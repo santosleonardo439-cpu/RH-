@@ -160,6 +160,38 @@ tr:hover td{background:rgba(59,130,246,.04)}
 <body>
 
 <div class="header">
+  .status-bar {
+  background: var(--s1);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.status-ok { color: var(--green); }
+.status-alerta { color: var(--orange); }
+.status-critico { color: var(--red); }
+
+.insights-box {
+  background: rgba(59,130,246,.06);
+  border-left: 4px solid var(--cyan);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.prioridades-box {
+  background: rgba(249,115,22,.06);
+  border-left: 4px solid var(--orange);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.insight-item {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+  <div class="status-bar" id="status-bar"></div>
   <div class="header-left">
     <div class="logo">RH</div>
     <div><h1>RH Custos</h1><p>Dashboard Executivo · Custo de Colaboradores</p></div>
@@ -189,6 +221,8 @@ tr:hover td{background:rgba(59,130,246,.04)}
     <select id="f-cc" onchange="applyFilters()"><option value="">Todos os CCs</option></select>
     <select id="f-nivel" onchange="applyFilters()"><option value="">Todos os Níveis</option></select>
     <button class="btn-sm" onclick="clearFilters()">✕ Limpar</button>
+    <div class="insights-box" id="insights-box"></div>
+<div class="prioridades-box" id="prioridades-box"></div>
   </div>
 
   <div class="sec-lbl">Indicadores Principais</div>
