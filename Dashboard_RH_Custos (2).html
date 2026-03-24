@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RH Custos | Dashboard Executivo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1623;--s1:#161e2e;--s2:#1c2840;--s3:#223050;--border:#2a3a58;
+  --text:#dde4f0;--muted:#6b7fa3;--blue:#3b82f6;--cyan:#06b6d4;--green:#22c55e;
+  --red:#ef4444;--orange:#f97316;--yellow:#eab308;--purple:#a855f7;--teal:#14b8a6;
+  --pink:#ec4899;--font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+/* HEADER */
+.header{background:linear-gradient(90deg,#0a0e1a,#0f172a,#0a1628);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+.logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-left h1{font-size:16px;font-weight:700}
+.header-left p{font-size:11px;color:var(--muted)}
+.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{padding:4px 12px;border-radius:20px;font-size:11px;font-family:var(--mono);background:var(--s2);border:1px solid var(--border);color:var(--muted)}
+.pill b{color:var(--cyan)}
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--s1);border-bottom:1px solid var(--border);padding:0 24px;overflow-x:auto}
+.tab{padding:11px 18px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;text-transform:uppercase;letter-spacing:.6px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+/* PANELS */
+.panel{display:none;padding:20px 24px}.panel.active{display:block}
+/* FILTERS */
+.filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:20px}
+.filter-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+select,input[type=text]{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:7px;font-family:var(--font);font-size:12px;cursor:pointer;outline:none;transition:border-color .2s}
+select:focus,input[type=text]:focus{border-color:var(--blue)}
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;transition:transform .2s}
+.kpi:hover{transform:translateY(-2px)}
+.kpi-bar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+.kpi-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+.kpi-val{font-size:20px;font-weight:800;font-family:var(--mono);line-height:1.1;margin-bottom:4px}
+.kpi-sub{font-size:10px;color:var(--muted)}
+.kpi-icon{position:absolute;bottom:10px;right:12px;font-size:26px;opacity:.08}
+/* CHARTS */
+.charts-2{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin-bottom:16px}
+.charts-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.charts-equal{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-size:13px;font-weight:700;margin-bottom:2px}
+.chart-sub{font-size:11px;color:var(--muted);margin-bottom:12px}
+/* TABLE */
+.tbl-wrap{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.tbl-hdr{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.tbl-hdr h3{font-size:13px;font-weight:700}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{background:var(--s2);padding:8px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 12px;font-size:12px;border-bottom:1px solid rgba(42,58,82,.4);vertical-align:middle;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(59,130,246,.04)}
+.mono{font-family:var(--mono);font-size:11px}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:var(--mono)}
+.tg{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.tr{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.to{background:rgba(249,115,22,.12);color:var(--orange);border:1px solid rgba(249,115,22,.25)}
+.tb{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+.tp{background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.25)}
+.tm{background:rgba(122,142,168,.1);color:var(--muted);border:1px solid rgba(122,142,168,.2)}
+/* SPLIT BARS */
+.split-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:4px 0}
+.split-empresa{background:var(--blue)}
+.split-cond{background:var(--purple)}
+/* SECTION LABEL */
+.sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+/* PARAMETROS */
+.param-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.param-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px}
+.param-title{font-size:12px;font-weight:700;margin-bottom:12px;color:var(--cyan)}
+.param-row{display:flex;align-items:center;gap-8px;margin-bottom:8px;padding:6px 0;border-bottom:1px solid rgba(42,58,82,.4)}
+.param-row:last-child{border-bottom:none;margin-bottom:0}
+.param-label{flex:1;font-size:12px;color:var(--text)}
+.param-input{width:70px;background:var(--s2);border:1px solid var(--border);color:var(--cyan);padding:4px 8px;border-radius:6px;font-family:var(--mono);font-size:12px;text-align:right;outline:none}
+.param-input:focus{border-color:var(--cyan)}
+.param-unit{font-size:11px;color:var(--muted);margin-left:4px;width:16px}
+/* CONDOMINIO KPI */
+.cond-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.cond-kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden}
+.cond-bar-top{position:absolute;top:0;left:0;right:0;height:3px}
+.cond-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px}
+.cond-val{font-size:22px;font-weight:800;font-family:var(--mono);margin-bottom:4px}
+.cond-sub{font-size:11px;color:var(--muted)}
+/* UPLOAD */
+.upload-zone{background:var(--s1);border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:16px}
+.upload-zone:hover,.upload-zone.over{border-color:var(--blue);background:rgba(59,130,246,.04)}
+.upload-icon{font-size:40px;margin-bottom:10px}
+.upload-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.upload-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.btn{padding:8px 20px;border-radius:8px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#fff}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-sm{padding:5px 12px;background:var(--s2);border:1px solid var(--border);color:var(--muted);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer}
+.btn-sm:hover{border-color:var(--blue);color:var(--cyan)}
+.prog-wrap{display:none;margin-bottom:12px}
+.prog-bar{height:6px;background:var(--s2);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:3px;width:0;transition:width .3s}
+.prog-txt{font-size:12px;color:var(--muted);text-align:center}
+.result-box{border-radius:10px;padding:14px 16px;margin-bottom:12px;font-size:13px;display:none}
+.result-ok{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);color:var(--green)}
+.result-err{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);color:var(--red)}
+/* ALERTS */
+.alert-resumo{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.alert-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.alert-num{font-size:32px;font-weight:800;font-family:var(--mono)}
+.alert-card.critico .alert-num{color:var(--red)}
+.alert-card.atencao .alert-num{color:var(--orange)}
+.alert-lbl{font-size:12px;color:var(--muted);margin-top:4px}
+.alert-item{background:var(--s1);border:1px solid var(--border);border-left-width:3px;border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.alert-item.critico{border-left-color:var(--red);background:rgba(239,68,68,.03)}
+.alert-item.atencao{border-left-color:var(--orange);background:rgba(249,115,22,.03)}
+.alert-tipo{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.alert-item.critico .alert-tipo{color:var(--red)}
+.alert-item.atencao .alert-tipo{color:var(--orange)}
+.alert-msg{font-size:13px}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;z-index:999;background:var(--s2);border:1px solid var(--green);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--green);transform:translateY(60px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+/* HEATMAP */
+.hmap{width:100%;border-collapse:collapse}
+.hmap th,.hmap td{padding:6px 10px;text-align:center;font-size:11px;border:1px solid var(--border)}
+.hmap th{background:var(--s2);color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase}
+.hmap td.lbl{text-align:left;color:var(--text);background:var(--s2);font-weight:600;white-space:nowrap}
+.hm0{background:rgba(34,197,94,.1);color:var(--green)}
+.hm1{background:rgba(59,130,246,.1);color:var(--blue)}
+.hm2{background:rgba(249,115,22,.14);color:var(--orange)}
+.hm3{background:rgba(239,68,68,.18);color:var(--red)}
+.hm-{color:var(--border)}
+/* FILE CHIP */
+.file-chip{display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;font-family:var(--mono)}
+.file-chip.pdf{border-color:rgba(239,68,68,.3);color:var(--red)}
+.file-chip.xlsx,.file-chip.xls{border-color:rgba(34,197,94,.3);color:var(--green)}
+.file-chip-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0;line-height:1}
+.file-chip-rm:hover{color:var(--red)}
+/* MODAL */
+#modal-colab, #modal-alerta { backdrop-filter: blur(4px); }
+#modal-colab > div, #modal-alerta > div { animation: modalIn .2s ease; }
+@keyframes modalIn { from { opacity:0; transform:translateY(-12px) scale(.97); } to { opacity:1; transform:none; } }
+#modal-colab input:focus, #modal-colab select:focus,
+#modal-alerta input:focus, #modal-alerta select:focus { border-color:var(--cyan) !important; }
+.alert-card.info .alert-num { color: var(--cyan); }
+@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.cond-kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-2,.charts-equal{grid-template-columns:1fr}.charts-3{grid-template-columns:1fr 1fr}.param-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-3{grid-template-columns:1fr}.param-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">RH</div>
+    <div><h1>RH Custos</h1><p>Dashboard Executivo · Custo de Colaboradores</p></div>
+  </div>
+  <div class="header-right">
+    <div class="pill">Colaboradores: <b id="h-colab">0</b></div>
+    <div class="pill">Período: <b id="h-periodo">—</b></div>
+    <div class="pill">Empresa: <b id="h-empresa">—</b></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="dashboard" onclick="setTab('dashboard')">📊 Dashboard</div>
+  <div class="tab" data-tab="condominio" onclick="setTab('condominio')">🏢 Empresa vs Condomínio</div>
+  <div class="tab" data-tab="parametros" onclick="setTab('parametros')">⚙️ Parâmetros</div>
+  <div class="tab" data-tab="alertas" onclick="setTab('alertas')">🔔 Alertas <span id="badge-alert" style="display:none;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:4px">0</span></div>
+  <div class="tab" data-tab="upload" onclick="setTab('upload')">📤 Upload</div>
+  <div class="tab" data-tab="colaboradores" onclick="setTab('colaboradores')">👥 Colaboradores</div>
+</div>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div class="panel active" id="panel-dashboard">
+  <div class="filters">
+    <span class="filter-lbl">Filtros</span>
+    <select id="f-periodo" onchange="applyFilters()"><option value="">Todos os Períodos</option></select>
+    <select id="f-empresa" onchange="applyFilters()"><option value="">Todas as Empresas</option></select>
+    <select id="f-cc" onchange="applyFilters()"><option value="">Todos os CCs</option></select>
+    <select id="f-nivel" onchange="applyFilters()"><option value="">Todos os Níveis</option></select>
+    <button class="btn-sm" onclick="clearFilters()">✕ Limpar</button>
+  </div>
+
+  <div class="sec-lbl">Indicadores Principais</div>
+  <div class="kpi-grid">
+    <div class="kpi" style="border-top:3px solid var(--blue)">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-lbl">Custo Total Folha</div>
+      <div class="kpi-val" id="k-total" style="color:var(--cyan)">R$ 0</div>
+      <div class="kpi-sub" id="k-total-s">0 centros de custo</div>
+    </div>
+    <div class="kpi" style="border-top:3px solid var(--green)">
+      <div class="kpi-icon">👤</div>
+      <div class="kpi-lbl">Custo Médio/Colaborador</div>
+      <div class="kpi-val" id="k-medio" style="color:var(--green)">R$ 0</div>
+      <div class="kpi-sub" id="k-medio-s">0 colaboradores</div>
+    </div>
+    <div class="kpi" style="border-top:3px solid var(--orange)">
+      <div class="kpi-icon">⏱</div>
+      <div class="kpi-lbl">Total Horas Extras</div>
+      <div class="kpi-val" id="k-he" style="color:var(--orange)">0h</div>
+      <div class="kpi-sub" id="k-he-s">R$ 0 em valor</div>
+    </div>
+    <div class="kpi" style="border-top:3px solid var(--red)">
+      <div class="kpi-icon">📅</div>
+      <div class="kpi-lbl">Total de Faltas</div>
+      <div class="kpi-val" id="k-faltas" style="color:var(--red)">0</div>
+      <div class="kpi-sub">dias no período</div>
+    </div>
+    <div class="kpi" style="border-top:3px solid var(--purple)">
+      <div class="kpi-icon">🏖</div>
+      <div class="kpi-lbl">Provisão Férias</div>
+      <div class="kpi-val" id="k-ferias" style="color:var(--purple)">R$ 0</div>
+      <div class="kpi-sub">acumulado</div>
+    </div>
+    <div class="kpi" style="border-top:3px solid var(--teal)">
+      <div class="kpi-icon">🎄</div>
+      <div class="kpi-lbl">Provisão 13º</div>
+      <div class="kpi-val" id="k-13" style="color:var(--teal)">R$ 0</div>
+      <div class="kpi-sub">acumulado</div>
+    </div>
+  </div>
+
+  <div class="charts-2">
+    <div class="chart-card">
+      <div class="chart-title">Evolução Mensal da Folha</div>
+      <div class="chart-sub">Custo total e média por colaborador ao longo dos meses</div>
+      <div style="position:relative;height:240px"><canvas id="c-evolucao"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Distribuição dos Custos</div>
+      <div class="chart-sub">Composição da folha por tipo</div>
+      <div style="position:relative;height:240px"><canvas id="c-dist"></canvas></div>
+    </div>
+  </div>
+
+  <div class="charts-equal">
+    <div class="chart-card">
+      <div class="chart-title">Custo por Centro de Custo</div>
+      <div class="chart-sub">Valor total por CC no período</div>
+      <div style="position:relative;height:260px"><canvas id="c-cc"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Custo por Nível Hierárquico</div>
+      <div class="chart-sub">Distribuição por nível de cargo</div>
+      <div style="position:relative;height:260px"><canvas id="c-nivel"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec-lbl">Heatmap de Custo</div>
+  <div class="chart-card" style="margin-bottom:16px">
+    <div class="chart-title">Heatmap de Custo por Setor × Mês</div>
+    <div class="chart-sub" style="margin-bottom:12px">🟢 Baixo · 🔵 Médio · 🟠 Alto · 🔴 Crítico</div>
+    <div style="overflow-x:auto"><table class="hmap" id="heatmap"></table></div>
+  </div>
+
+  <div class="sec-lbl">Ranking</div>
+  <div class="tbl-wrap">
+    <div class="tbl-hdr"><h3>Top 20 Colaboradores por Custo Total</h3><button class="btn-sm" onclick="exportCSV()">⬇ CSV</button></div>
+    <div class="tbl-scroll">
+      <table><thead><tr>
+        <th>#</th><th>Matrícula</th><th>Nome</th><th>Cargo</th><th>Nível</th><th>Centro de Custo</th>
+        <th>Salário</th><th>Encargos</th><th>Benefícios</th><th>H.Extras</th><th>Faltas</th>
+        <th>Custo Empresa</th><th>Custo Cond.</th><th>Custo Total</th>
+      </tr></thead><tbody id="tb-ranking"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ EMPRESA VS CONDOMÍNIO ══════════ -->
+<div class="panel" id="panel-condominio">
+  <div class="filters">
+    <span class="filter-lbl">Filtros</span>
+    <select id="fc-periodo" onchange="renderCondominio()"><option value="">Todos os Períodos</option></select>
+    <select id="fc-empresa" onchange="renderCondominio()"><option value="">Todas as Empresas</option></select>
+    <select id="fc-cc" onchange="renderCondominio()"><option value="">Todos os CCs</option></select>
+  </div>
+
+  <div class="sec-lbl">Visão Geral — Empresa vs Condomínio</div>
+  <div class="cond-kpi-grid">
+    <div class="cond-kpi">
+      <div class="cond-bar-top" style="background:linear-gradient(90deg,var(--blue),var(--cyan))"></div>
+      <div class="cond-lbl">Custo Total Folha</div>
+      <div class="cond-val" id="ck-total" style="color:var(--cyan)">R$ 0</div>
+      <div class="cond-sub">Base de cálculo</div>
+    </div>
+    <div class="cond-kpi">
+      <div class="cond-bar-top" style="background:linear-gradient(90deg,var(--blue),#2563eb)"></div>
+      <div class="cond-lbl">Custo Empresa</div>
+      <div class="cond-val" id="ck-empresa" style="color:var(--blue)">R$ 0</div>
+      <div class="cond-sub" id="ck-empresa-pct">0% do total</div>
+    </div>
+    <div class="cond-kpi">
+      <div class="cond-bar-top" style="background:linear-gradient(90deg,var(--purple),#7c3aed)"></div>
+      <div class="cond-lbl">Custo Condomínio</div>
+      <div class="cond-val" id="ck-cond" style="color:var(--purple)">R$ 0</div>
+      <div class="cond-sub" id="ck-cond-pct">0% do total</div>
+    </div>
+    <div class="cond-kpi">
+      <div class="cond-bar-top" style="background:linear-gradient(90deg,var(--green),#16a34a)"></div>
+      <div class="cond-lbl">Média % Condomínio</div>
+      <div class="cond-val" id="ck-pct-medio" style="color:var(--green)">0%</div>
+      <div class="cond-sub">% médio aplicado</div>
+    </div>
+  </div>
+
+  <div class="charts-equal">
+    <div class="chart-card">
+      <div class="chart-title">Empresa vs Condomínio — Visão Geral</div>
+      <div class="chart-sub">Proporção do custo por origem</div>
+      <div style="position:relative;height:240px"><canvas id="c-cond-pie"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Custo por CC — Empresa vs Condomínio</div>
+      <div class="chart-sub">Barras empilhadas por centro de custo</div>
+      <div style="position:relative;height:240px"><canvas id="c-cond-cc"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec-lbl">Detalhamento por Colaborador</div>
+  <div class="tbl-wrap">
+    <div class="tbl-hdr"><h3>Custo Empresa × Condomínio por Colaborador</h3><button class="btn-sm" onclick="exportCondCSV()">⬇ CSV</button></div>
+    <div class="tbl-scroll">
+      <table><thead><tr>
+        <th>Matrícula</th><th>Nome</th><th>Cargo</th><th>% Cond.</th><th>Centro de Custo</th>
+        <th>Custo Total</th><th>Custo Empresa</th><th>Custo Cond.</th><th>Divisão</th>
+      </tr></thead><tbody id="tb-cond"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PARÂMETROS ══════════ -->
+<div class="panel" id="panel-parametros">
+  <div class="sec-lbl">Identificação — Empresa × Condomínio</div>
+  <div id="param-empresa-cond-wrap" style="margin-bottom:16px"></div>
+
+  <div class="sec-lbl">Parâmetros do Sistema</div>
+  <div class="param-grid">
+    <div class="param-card">
+      <div class="param-title">📊 SLA de Recrutamento (dias)</div>
+      <div class="param-row"><span class="param-label">Nível Operacional</span><input class="param-input" id="sla-operacional" value="10"><span class="param-unit">d</span></div>
+      <div class="param-row"><span class="param-label">Nível Administrativo</span><input class="param-input" id="sla-administrativo" value="25"><span class="param-unit">d</span></div>
+      <div class="param-row"><span class="param-label">Nível Assistencial</span><input class="param-input" id="sla-assistencial" value="10"><span class="param-unit">d</span></div>
+      <div class="param-row"><span class="param-label">Nível Estratégico</span><input class="param-input" id="sla-estrategico" value="30"><span class="param-unit">d</span></div>
+    </div>
+    <div class="param-card">
+      <div class="param-title">🚨 Limites de Alertas</div>
+      <div class="param-row"><span class="param-label">H. Extras — Atenção</span><input class="param-input" id="alr-he-atencao" value="1"><span class="param-unit">h</span></div>
+      <div class="param-row"><span class="param-label">H. Extras — Crítico</span><input class="param-input" id="alr-he-critico" value="20"><span class="param-unit">h</span></div>
+      <div class="param-row"><span class="param-label">Faltas — Atenção</span><input class="param-input" id="alr-faltas-atencao" value="1"><span class="param-unit">d</span></div>
+      <div class="param-row"><span class="param-label">Faltas — Crítico</span><input class="param-input" id="alr-faltas-critico" value="3"><span class="param-unit">d</span></div>
+      <div class="param-row"><span class="param-label">Custo Elevado (×média)</span><input class="param-input" id="alr-custo" value="2"><span class="param-unit">×</span></div>
+      <div class="param-row"><span class="param-label">Concentração CC</span><input class="param-input" id="alr-conc" value="35"><span class="param-unit">%</span></div>
+    </div>
+    <div class="param-card">
+      <div class="param-title">💰 Cálculo de Provisões</div>
+      <div class="param-row"><span class="param-label">Abono férias (1/3)</span><input class="param-input" id="prov-ferias" value="1.333"><span class="param-unit">×</span></div>
+      <div class="param-row"><span class="param-label">Divisor horas/mês</span><input class="param-input" id="prov-hdiv" value="220"><span class="param-unit">h</span></div>
+      <div class="param-row"><span class="param-label">Adicional HE</span><input class="param-input" id="prov-he" value="1.5"><span class="param-unit">×</span></div>
+    </div>
+  </div>
+
+  <div class="sec-lbl">% Condomínio por Cargo</div>
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--cyan)">Percentuais do Condomínio por Cargo</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">O % incide sobre o custo total (salário + encargos + benefícios) de cada colaborador</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" onclick="addCargoPct()">+ Adicionar Cargo</button>
+        <button class="btn-sm" onclick="saveParams()" style="border-color:var(--cyan);color:var(--cyan)">💾 Salvar Parâmetros</button>
+      </div>
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr><th>Cargo</th><th>% Condomínio</th><th>Exemplo (custo R$ 5.000)</th><th>Empresa</th><th>Condomínio</th><th></th></tr></thead>
+        <tbody id="tb-pct-cargo"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px">
+    <div style="font-size:13px;font-weight:700;color:var(--cyan);margin-bottom:12px">📋 Estrutura Esperada da Planilha Excel</div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Coluna</th><th>Nome(s) aceito(s)</th><th>Tipo</th><th>Obrigatório</th><th>Exemplo</th></tr></thead>
+        <tbody>
+          <tr><td><b>matricula</b></td><td class="mono">matricula, matrícula, mat</td><td>Texto</td><td><span class="tag tg">Sim</span></td><td class="mono">001234</td></tr>
+          <tr><td><b>nome</b></td><td class="mono">nome, nome colaborador, colaborador</td><td>Texto</td><td><span class="tag tg">Sim</span></td><td class="mono">Maria Silva</td></tr>
+          <tr><td><b>centro_custo</b></td><td class="mono">centro de custo, centro_custo, cc</td><td>Texto</td><td><span class="tag tg">Sim</span></td><td class="mono">1000</td></tr>
+          <tr><td><b>cargo</b></td><td class="mono">cargo, função, funcao</td><td>Texto</td><td><span class="tag tg">Sim</span></td><td class="mono">Recepcionista</td></tr>
+          <tr><td><b>nivel_vaga</b></td><td class="mono">nível vaga, nivel, nivel_vaga</td><td>Texto</td><td><span class="tag to">Rec.</span></td><td class="mono">Operacional</td></tr>
+          <tr><td><b>salario</b></td><td class="mono">salário, salario, sal</td><td>Número</td><td><span class="tag tg">Sim</span></td><td class="mono">2500.00</td></tr>
+          <tr><td><b>encargos</b></td><td class="mono">encargos, encargo</td><td>Número</td><td><span class="tag tg">Sim</span></td><td class="mono">875.00</td></tr>
+          <tr><td><b>beneficios</b></td><td class="mono">benefícios, beneficios, beneficio</td><td>Número</td><td><span class="tag tg">Sim</span></td><td class="mono">450.00</td></tr>
+          <tr><td><b>horas_extras</b></td><td class="mono">horas extras, horas_extras, he</td><td>Número</td><td><span class="tag tm">Não</span></td><td class="mono">4.5</td></tr>
+          <tr><td><b>adicional_noturno</b></td><td class="mono">adicional noturno, adicional_noturno</td><td>Número</td><td><span class="tag tm">Não</span></td><td class="mono">120.00</td></tr>
+          <tr><td><b>faltas</b></td><td class="mono">faltas, falta, abs</td><td>Número</td><td><span class="tag tm">Não</span></td><td class="mono">1</td></tr>
+          <tr><td><b>data_referencia</b></td><td class="mono">data referência, período, competência</td><td>Data</td><td><span class="tag tg">Sim</span></td><td class="mono">01/03/2026</td></tr>
+          <tr><td><b>tipo</b></td><td class="mono">tipo, tipo lançamento, cod</td><td>Número</td><td><span class="tag tg">Sim</span></td><td class="mono">1=Créd, 2=Déb, 3=Imp</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ALERTAS ══════════ -->
+<div class="panel" id="panel-alertas">
+  <div class="filters">
+    <span class="filter-lbl">Filtrar</span>
+    <select id="fa-tipo" onchange="renderAlertas()"><option value="">Todos os tipos</option><option value="horas_extras">Horas Extras</option><option value="absenteismo">Absenteísmo</option><option value="custo_elevado">Custo Elevado</option><option value="concentracao">Concentração CC</option><option value="manual">Manual</option></select>
+    <select id="fa-sev" onchange="renderAlertas()"><option value="">Todas severidades</option><option value="critico">Crítico</option><option value="atencao">Atenção</option></select>
+    <button class="btn btn-primary" onclick="abrirModalAlerta()" style="padding:6px 14px;font-size:12px;margin-left:auto">+ Novo Alerta</button>
+    <button class="btn-sm" onclick="gerarAlertas();renderAlertas();toast('Alertas atualizados!')">🔄 Recalcular</button>
+  </div>
+  <div class="alert-resumo" id="alert-resumo"></div>
+  <div id="alert-lista"></div>
+</div>
+
+<!-- MODAL ALERTA -->
+<div id="modal-alerta" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:28px;width:480px;max-width:95vw">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 id="modal-alerta-title" style="font-size:15px;font-weight:700">Novo Alerta Manual</h3>
+      <button onclick="fecharModalAlerta()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Severidade</label>
+        <select id="ma-sev" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+          <option value="atencao">⚠️ Atenção</option>
+          <option value="critico">🔴 Crítico</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Tipo</label>
+        <select id="ma-tipo" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+          <option value="manual">📝 Manual</option>
+          <option value="horas_extras">⏱ Horas Extras</option>
+          <option value="absenteismo">📅 Absenteísmo</option>
+          <option value="custo_elevado">💰 Custo Elevado</option>
+          <option value="concentracao">📊 Concentração CC</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Mensagem *</label>
+        <input id="ma-msg" type="text" placeholder="Descrição do alerta..." style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Detalhe</label>
+        <input id="ma-detalhe" type="text" placeholder="Informação adicional..." style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+    </div>
+    <input type="hidden" id="ma-edit-idx" value="">
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+      <button class="btn-sm" onclick="fecharModalAlerta()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarAlerta()">💾 Salvar Alerta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ UPLOAD ══════════ -->
+<div class="panel" id="panel-upload">
+
+  <!-- Zona de Drop -->
+  <div class="upload-zone" id="upload-zone"
+    onclick="document.getElementById('file-inp').click()"
+    ondrop="handleDrop(event)" ondragover="event.preventDefault()"
+    ondragenter="this.classList.add('over')" ondragleave="this.classList.remove('over')">
+    <div class="upload-icon">📤</div>
+    <div class="upload-title">Arraste PDF ou Excel aqui</div>
+    <div class="upload-sub">PDF Sênior (folha de pagamento) · Excel .xlsx / .xls · Múltiplos arquivos aceitos</div>
+    <input type="file" id="file-inp" accept=".pdf,.xlsx,.xls" multiple style="display:none" onchange="handleFile(event)">
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn btn-primary" onclick="event.stopPropagation();document.getElementById('file-inp').click()">📎 Selecionar Arquivo(s)</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted)">Selecione todos os PDFs do mês de uma só vez · Formatos: .pdf .xlsx .xls</div>
+  </div>
+
+  <!-- Fila de arquivos selecionados (antes de processar) -->
+  <div id="file-queue-wrap" style="display:none;background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="font-size:12px;font-weight:700">📋 Arquivos na fila <span id="file-queue-count" style="color:var(--cyan)"></span></span>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" onclick="limparFila()">✕ Limpar fila</button>
+        <button class="btn btn-primary" onclick="processarFila()" style="padding:5px 14px;font-size:12px">▶ Processar</button>
+      </div>
+    </div>
+    <div id="file-queue-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="prog-wrap" id="prog-wrap">
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-txt" id="prog-txt">Processando...</div>
+  </div>
+  <div class="result-box" id="result-box"></div>
+
+  <!-- Dados carregados / limpar -->
+  <div id="dados-resumo" style="display:none;background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--muted)">📊 Dados na memória: <b id="dados-count" style="color:var(--cyan)">0</b> registros · <b id="dados-colab-count" style="color:var(--green)">0</b> colaboradores únicos</span>
+      <button class="btn-sm" style="color:var(--red);border-color:rgba(239,68,68,.3)" onclick="limparDados()">🗑 Limpar todos os dados</button>
+    </div>
+  </div>
+
+  <!-- Histórico -->
+  <div class="tbl-wrap">
+    <div class="tbl-hdr">
+      <h3>Histórico de Importações</h3>
+      <button class="btn-sm" onclick="limparHistorico()" style="color:var(--muted)">🗑 Limpar histórico</button>
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr>
+          <th>Data/Hora</th>
+          <th>Arquivo / Diagnóstico</th>
+          <th>Tipo</th>
+          <th>Registros</th>
+          <th>Status</th>
+        </tr></thead>
+        <tbody id="tb-hist"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ COLABORADORES ══════════ -->
+<div class="panel" id="panel-colaboradores">
+  <div class="filters">
+    <span class="filter-lbl">Buscar</span>
+    <input type="text" id="busca-colab" placeholder="Nome ou matrícula..." oninput="renderColabs()" style="width:260px">
+    <select id="fc-nivel-colab" onchange="renderColabs()"><option value="">Todos os Níveis</option></select>
+    <select id="fc-cc-colab" onchange="renderColabs()"><option value="">Todos os CCs</option></select>
+    <button class="btn btn-primary" onclick="abrirModalColab(null)" style="padding:6px 14px;font-size:12px">+ Contratar</button>
+  </div>
+  <div class="tbl-wrap">
+    <div class="tbl-hdr">
+      <h3 id="colab-titulo">Colaboradores</h3>
+      <div style="display:flex;gap:8px">
+        <span style="font-size:11px;color:var(--muted);align-self:center">Clique em uma linha para editar</span>
+      </div>
+    </div>
+    <div class="tbl-scroll">
+      <table><thead><tr>
+        <th>Matrícula</th><th>Nome</th><th>Cargo</th><th>Nível</th><th>Centro de Custo</th>
+        <th>Salário</th><th>Custo Total</th><th>% Cond.</th><th>Custo Emp.</th><th>Custo Cond.</th><th>H.Extras</th><th>Faltas</th><th>Status</th><th>Ações</th>
+      </tr></thead><tbody id="tb-colab"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COLABORADOR -->
+<div id="modal-colab" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:28px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 id="modal-colab-title" style="font-size:15px;font-weight:700">Novo Colaborador</h3>
+      <button onclick="fecharModalColab()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Matrícula *</label>
+        <input id="mc-matricula" type="text" placeholder="000001" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Nome Completo *</label>
+        <input id="mc-nome" type="text" placeholder="Nome do colaborador" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Cargo *</label>
+        <input id="mc-cargo" type="text" placeholder="Ex: Recepcionista" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Nível</label>
+        <select id="mc-nivel" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+          <option>Operacional</option><option>Administrativo</option><option>Assistencial</option><option>Estratégico</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Centro de Custo *</label>
+        <input id="mc-cc" type="text" placeholder="Ex: 1000 Administrativo" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Salário Base (R$) *</label>
+        <input id="mc-salario" type="number" min="0" step="0.01" placeholder="2500.00" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Encargos (R$)</label>
+        <input id="mc-encargos" type="number" min="0" step="0.01" placeholder="875.00" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Benefícios (R$)</label>
+        <input id="mc-beneficios" type="number" min="0" step="0.01" placeholder="450.00" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Horas Extras</label>
+        <input id="mc-he" type="number" min="0" step="0.5" placeholder="0" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Faltas (dias)</label>
+        <input id="mc-faltas" type="number" min="0" step="1" placeholder="0" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Período (MM/AAAA)</label>
+        <input id="mc-periodo" type="text" placeholder="03/2026" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:5px">Status</label>
+        <select id="mc-status" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-family:var(--font);font-size:13px;outline:none">
+          <option value="Ativo">Ativo</option>
+          <option value="Desligado">Desligado</option>
+          <option value="Afastado">Afastado</option>
+          <option value="Férias">Férias</option>
+        </select>
+      </div>
+    </div>
+    <div id="modal-colab-demit" style="display:none;margin-top:16px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px">⚠️ Desligamento</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Data de Desligamento</label>
+          <input id="mc-data-demit" type="date" style="width:100%;background:var(--s2);border:1px solid rgba(239,68,68,.3);color:var(--text);padding:7px 10px;border-radius:7px;font-family:var(--font);font-size:12px;outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Motivo</label>
+          <select id="mc-motivo-demit" style="width:100%;background:var(--s2);border:1px solid rgba(239,68,68,.3);color:var(--text);padding:7px 10px;border-radius:7px;font-family:var(--font);font-size:12px;outline:none">
+            <option>Pedido de demissão</option>
+            <option>Demissão sem justa causa</option>
+            <option>Demissão com justa causa</option>
+            <option>Aposentadoria</option>
+            <option>Término de contrato</option>
+            <option>Acordo mútuo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="mc-edit-idx">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
+      <div>
+        <button id="btn-modal-excluir" class="btn" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--red);font-size:12px;padding:6px 14px;display:none" onclick="excluirColab()">🗑 Excluir</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" onclick="fecharModalColab()">Cancelar</button>
+        <button id="btn-modal-demit" class="btn" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:var(--red);font-size:12px;padding:6px 14px;display:none" onclick="toggleDemissao()">🔴 Desligar</button>
+        <button class="btn btn-primary" onclick="salvarColab()">💾 Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// ══════════════════════════════════════════
+// ESTADO GLOBAL
+// ══════════════════════════════════════════
+let DATA = [];
+let HIST = [];
+let ALERTAS = [];
+let PARAMS = {
+  sla: { operacional:10, administrativo:25, assistencial:10, estrategico:30 },
+  alertas: { he_atencao:1, he_critico:20, faltas_atencao:1, faltas_critico:3, custo_mult:2, conc_cc:35 },
+  provisoes: { ferias:1.333, hdiv:220, he_mult:1.5 },
+  pct_condominio: {
+    'Recepcionista': 20,
+    'Analista': 15,
+    'Operador de Teleatendimento': 18,
+    'Assistente': 16,
+    'Arquivista': 14,
+    'Especialista': 12,
+    'Enfermeiro': 22,
+    'Técnico': 17
+  }
+};
+
+const CHARTS = {};
+const BR = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const NUM = v => parseFloat(v||0).toLocaleString('pt-BR',{maximumFractionDigits:1});
+const CD = { color:'rgba(221,228,240,.85)', grid:'rgba(42,58,88,.6)', font:'Plus Jakarta Sans' };
+
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = ok ? 'rgba(34,197,94,.4)' : 'rgba(239,68,68,.4)';
+  t.style.color = ok ? 'var(--green)' : 'var(--red)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function destroyChart(id) { if(CHARTS[id]){ CHARTS[id].destroy(); delete CHARTS[id]; } }
+
+// ══════════════════════════════════════════
+// NAVEGAÇÃO
+// ══════════════════════════════════════════
+function setTab(t) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  // find tab by data-tab attribute for robustness
+  const tabEl = document.querySelector(`.tab[data-tab="${t}"]`);
+  if (tabEl) tabEl.classList.add('active');
+  const panelEl = document.getElementById('panel-'+t);
+  if (panelEl) panelEl.classList.add('active');
+  if (t === 'condominio') renderCondominio();
+  if (t === 'alertas') renderAlertas();
+  if (t === 'colaboradores') renderColabs();
+  if (t === 'parametros') { renderPctCargos(); renderParamEmpresaCond(); }
+}
+
+// ══════════════════════════════════════════
+// % CONDOMÍNIO POR CARGO
+// ══════════════════════════════════════════
+function getPctCargo(cargo) {
+  if (!cargo) return 0;
+  const c = String(cargo).trim();
+  for (const [key, val] of Object.entries(PARAMS.pct_condominio)) {
+    if (c.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(c.toLowerCase())) return val;
+  }
+  return Object.values(PARAMS.pct_condominio)[0] || 15;
+}
+
+function custoCondominio(row) {
+  const base = (parseFloat(row.salario)||0) + (parseFloat(row.encargos)||0) + (parseFloat(row.beneficios)||0);
+  const pct  = getPctCargo(row.cargo);
+  return base * (pct / 100);
+}
+
+function custoEmpresa(row) {
+  return (parseFloat(row.custo_total)||0) - custoCondominio(row);
+}
+
+function renderPctCargos() {
+  const tbody = document.getElementById('tb-pct-cargo');
+  tbody.innerHTML = Object.entries(PARAMS.pct_condominio).map(([cargo, pct], i) => {
+    const ex = 5000;
+    const cond = (ex * pct / 100).toLocaleString('pt-BR', {minimumFractionDigits:2});
+    const emp  = (ex - ex * pct / 100).toLocaleString('pt-BR', {minimumFractionDigits:2});
+    return `<tr>
+      <td><input type="text" value="${cargo}" onchange="updateCargoPct(${i},'nome',this.value)" style="background:var(--s2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:12px;width:180px"></td>
+      <td><input class="param-input" type="number" value="${pct}" min="0" max="100" onchange="updateCargoPct(${i},'pct',this.value)" style="width:70px"></td>
+      <td class="mono">R$ 5.000,00</td>
+      <td class="mono" style="color:var(--blue)">R$ ${emp}</td>
+      <td class="mono" style="color:var(--purple)">R$ ${cond}</td>
+      <td><button class="btn-sm" style="color:var(--red)" onclick="removeCargoPct('${cargo}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateCargoPct(idx, field, value) {
+  const entries = Object.entries(PARAMS.pct_condominio);
+  if (field === 'nome') {
+    const oldKey = entries[idx][0];
+    const val = PARAMS.pct_condominio[oldKey];
+    delete PARAMS.pct_condominio[oldKey];
+    PARAMS.pct_condominio[value] = val;
+  } else {
+    const key = entries[idx][0];
+    PARAMS.pct_condominio[key] = parseFloat(value) || 0;
+  }
+  renderPctCargos();
+}
+
+function addCargoPct() {
+  const nome = prompt('Nome do cargo:');
+  if (!nome) return;
+  const pct = parseFloat(prompt('% Condomínio (ex: 18):')) || 15;
+  PARAMS.pct_condominio[nome] = pct;
+  renderPctCargos();
+  toast('Cargo adicionado!');
+}
+
+function removeCargoPct(cargo) {
+  delete PARAMS.pct_condominio[cargo];
+  renderPctCargos();
+  toast('Cargo removido.');
+}
+
+function saveParams() {
+  PARAMS.sla.operacional    = parseFloat(document.getElementById('sla-operacional').value)||10;
+  PARAMS.sla.administrativo = parseFloat(document.getElementById('sla-administrativo').value)||25;
+  PARAMS.sla.assistencial   = parseFloat(document.getElementById('sla-assistencial').value)||10;
+  PARAMS.sla.estrategico    = parseFloat(document.getElementById('sla-estrategico').value)||30;
+  PARAMS.alertas.he_atencao = parseFloat(document.getElementById('alr-he-atencao').value)||1;
+  PARAMS.alertas.he_critico = parseFloat(document.getElementById('alr-he-critico').value)||20;
+  PARAMS.alertas.faltas_atencao = parseFloat(document.getElementById('alr-faltas-atencao').value)||1;
+  PARAMS.alertas.faltas_critico = parseFloat(document.getElementById('alr-faltas-critico').value)||3;
+  PARAMS.alertas.custo_mult = parseFloat(document.getElementById('alr-custo').value)||2;
+  PARAMS.alertas.conc_cc    = parseFloat(document.getElementById('alr-conc').value)||35;
+  PARAMS.provisoes.ferias   = parseFloat(document.getElementById('prov-ferias').value)||1.333;
+  PARAMS.provisoes.hdiv     = parseFloat(document.getElementById('prov-hdiv').value)||220;
+  PARAMS.provisoes.he_mult  = parseFloat(document.getElementById('prov-he').value)||1.5;
+  localStorage.setItem('rh_params', JSON.stringify(PARAMS));
+  gerarAlertas();
+  toast('✅ Parâmetros salvos com sucesso!');
+}
+
+// ══════════════════════════════════════════
+// UPLOAD E PARSE EXCEL — PARSER INTELIGENTE
+// Busca nome completo + varredura linha a linha
+// Campos não encontrados exibidos como " - "
+// ══════════════════════════════════════════
+
+// Normaliza string: minúsculo, sem acento, sem espaço duplo
+function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,' '); }
+
+// Verifica se valor é vazio/nulo
+function isEmpty(v){ return v === null || v === undefined || String(v).trim() === ''; }
+
+// Valor seguro: retorna ' - ' se vazio
+function safe(v){ const s = String(v||'').trim(); return s === '' || s === 'null' || s === 'undefined' ? '-' : s; }
+
+// Converte para número seguro — retorna 0 se inválido
+function toNum(v){
+  if (isEmpty(v)) return 0;
+  const s = String(v).replace(/\s/g,'').replace(',','.').replace(/[^\d.\-]/g,'');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+// Converte serial Excel ou string para Date
+function toDate(v){
+  if (isEmpty(v)) return null;
+  if (typeof v === 'number' && v > 1000) {
+    // Serial Excel: dias desde 1900-01-00
+    const d = new Date(Math.round((v - 25569) * 86400 * 1000));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  const s = String(v).trim();
+  // Formatos: DD/MM/AAAA, MM/AAAA, AAAA-MM-DD, DD-MM-AAAA
+  const fmts = [
+    { re:/^(\d{2})\/(\d{2})\/(\d{4})$/, fn:m => new Date(+m[3],+m[2]-1,+m[1]) },
+    { re:/^(\d{2})\/(\d{4})$/,          fn:m => new Date(+m[2],+m[1]-1,1) },
+    { re:/^(\d{4})-(\d{2})-(\d{2})$/,   fn:m => new Date(+m[1],+m[2]-1,+m[3]) },
+    { re:/^(\d{2})-(\d{2})-(\d{4})$/,   fn:m => new Date(+m[3],+m[2]-1,+m[1]) },
+  ];
+  for (const f of fmts) {
+    const m = s.match(f.re);
+    if (m) { const d = f.fn(m); if (!isNaN(d.getTime())) return d; }
+  }
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// Mapa de aliases por campo — quanto mais aliases, melhor a cobertura
+const COL_MAP = {
+  matricula:         ['matricula','matriculas','mat','mat.','codigo','cod','codigo colaborador','cod. colaborador','id colaborador','registro','chapa','num. func','numero func','num func'],
+  nome:              ['nome','nome colaborador','nome do colaborador','colaborador','funcionario','funcionário','nome func','nome funcionario','nome completo'],
+  centro_custo:      ['centro de custo','centro custo','centro_custo','cc','cod cc','cod. cc','codigo cc','depto','departamento','setor','lotacao','lotação','unidade org'],
+  cargo:             ['cargo','função','funcao','descricao cargo','descrição cargo','cargo atual','desc. cargo','ocupacao','ocupação','funcao atual'],
+  nivel_vaga:        ['nivel vaga','nível vaga','nivel','nível','nivel_vaga','categoria','tipo cargo','classificacao','classificação'],
+  salario:           ['salario','salário','sal','sal.','salario base','salário base','vencimento','vencimento base','remuneracao','remuneração','proventos','base salarial'],
+  encargos:          ['encargos','encargo','encargos sociais','inss empregador','fgts total','encargo social','custo encargo','contrib patronal'],
+  beneficios:        ['beneficios','benefícios','beneficio','benefício','total beneficios','total benefícios','vale transporte','vt','va','vale alimentação','ps','plano saude'],
+  horas_extras:      ['horas extras','horas_extras','he','h.e.','hora extra','qtd he','qtd horas extras','horas extra','total he','total horas extras'],
+  adicional_noturno: ['adicional noturno','adicional_noturno','ad. noturno','ad.not','adic noturno','adicional not','ad noturno'],
+  faltas:            ['faltas','falta','abs','ausencias','ausências','qtd faltas','dias falta','total faltas','dias ausentes'],
+  data_referencia:   ['data referencia','data referência','data_referencia','data ref','data ref.','periodo','período','competencia','competência','mes referencia','mês referência','data folha','ref','referencia','referência'],
+  tipo:              ['tipo','tipo lancamento','tipo lançamento','cod tipo','codigo tipo','código tipo','natureza','nat.','1','tipo registro']
+};
+
+// Detecta automaticamente qual coluna do Excel corresponde a cada campo
+// Estratégia: exact match → contains → partial → posição padrão
+function mapCols(headerRow) {
+  const map = {};
+  const header = headerRow.map((h,i) => ({ orig: h, norm: norm(String(h||'')), idx: i }));
+
+  for (const [campo, aliases] of Object.entries(COL_MAP)) {
+    // 1. Match exato
+    let found = header.find(h => aliases.includes(h.norm));
+    // 2. Match parcial: algum alias está contido no header ou vice-versa
+    if (!found) found = header.find(h => aliases.some(a => h.norm.includes(a) || a.includes(h.norm)));
+    if (found) map[campo] = found.idx;
+  }
+
+  // Log das colunas identificadas e não identificadas para debug
+  const found    = Object.keys(map);
+  const missing  = Object.keys(COL_MAP).filter(c => !found.includes(c));
+  console.info('[Parser] Colunas mapeadas:', found);
+  if (missing.length) console.warn('[Parser] Colunas NÃO encontradas (serão " - "):', missing);
+
+  return map;
+}
+
+// Monta objeto completo da linha — campos ausentes = '-'
+function parseRow(row, map, headerRow) {
+  // Busca valor pelo índice mapeado OU varre toda a linha procurando o campo
+  const g = campo => {
+    if (campo in map) return row[map[campo]];
+    // Busca inteligente: percorre todas as células da linha procurando conteúdo relevante
+    return null;
+  };
+
+  // Nome completo: captura todos os tokens, não trunca
+  const nomeRaw = g('nome');
+  const nome = isEmpty(nomeRaw)
+    ? '-'
+    : String(nomeRaw).trim().replace(/\s+/g, ' '); // preserva nome completo
+
+  const matriculaRaw = g('matricula');
+  const matricula = isEmpty(matriculaRaw) ? '-' : String(matriculaRaw).trim();
+
+  const salario    = toNum(g('salario'));
+  const encargos   = toNum(g('encargos'));
+  const beneficios = toNum(g('beneficios'));
+  const he         = toNum(g('horas_extras'));
+  const heVal      = salario > 0 ? (salario / PARAMS.provisoes.hdiv) * PARAMS.provisoes.he_mult * he : 0;
+  const adNot      = toNum(g('adicional_noturno'));
+  const faltas     = toNum(g('faltas'));
+  const descFaltas = salario > 0 ? (salario / 30) * faltas : 0;
+  const provFerias = (salario / 12) * PARAMS.provisoes.ferias;
+  const prov13     = salario / 12;
+  const custoTotal = salario + encargos + beneficios + heVal + adNot - descFaltas + provFerias + prov13;
+
+  const d       = toDate(g('data_referencia'));
+  const mes     = d ? d.getMonth() + 1 : null;
+  const ano     = d ? d.getFullYear() : null;
+  const periodo = mes && ano ? `${String(mes).padStart(2,'0')}/${ano}` : '-';
+
+  // Tipo: tenta detectar pelo valor (1/2/3, C/D/I, crédito/débito/imposto)
+  const tipoRaw = g('tipo');
+  let tipo = 1;
+  if (!isEmpty(tipoRaw)) {
+    const ts = norm(String(tipoRaw));
+    if (ts === '2' || ts.startsWith('deb') || ts === 'd') tipo = 2;
+    else if (ts === '3' || ts.startsWith('imp') || ts === 'i') tipo = 3;
+    else tipo = parseInt(ts) || 1;
+  }
+
+  return {
+    matricula,
+    nome,
+    centro_custo: safe(g('centro_custo')),
+    cargo:        safe(g('cargo')),
+    nivel_vaga:   safe(g('nivel_vaga')) === '-' ? 'Operacional' : safe(g('nivel_vaga')),
+    tipo,
+    salario, encargos, beneficios,
+    horas_extras:      he,
+    valor_he:          heVal,
+    adicional_noturno: adNot,
+    faltas,
+    desconto_faltas:   descFaltas,
+    provisao_ferias:   provFerias,
+    provisao_13:       prov13,
+    custo_total:       custoTotal,
+    mes, ano, periodo,
+    // Flag campos ausentes para exibição
+    _sem_matricula:    matricula === '-',
+    _sem_nome:         nome === '-',
+    _sem_cc:           safe(g('centro_custo')) === '-',
+    _sem_cargo:        safe(g('cargo')) === '-',
+    _sem_data:         periodo === '-',
+  };
+}
+
+// ══════════════════════════════════════════
+// PARSER PDF SÊNIOR — FOLHA DE PAGAMENTO
+// Lê layout de holerite analítico do sistema Sênior
+// Extrai: colaborador, empresa, CC, cargo, salário,
+// encargos (Tp04), descontos, proventos, HE, faltas
+// ══════════════════════════════════════════
+
+// Configura PDF.js worker
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+// Converte "4.097,54" → 4097.54
+function parseBR(s) {
+  if (!s) return 0;
+  const v = String(s).trim().replace(/\./g,'').replace(',','.');
+  const n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+}
+
+// Extrai todos os lançamentos de um bloco de texto de um colaborador
+// Retorna array de { cod, tp, descricao, referencia, valor }
+function extrairLancamentos(texto) {
+  const lancamentos = [];
+  // Padrão: COD  TP  DESCRIÇÃO  [REFERENCIA]  VALOR
+  // Ex: "1 01 SALARIO 200,00 4.097,54"  ou  "1056 03 DESC.ADTO SALARIAL 1.639,02"
+  const linhas = texto.split('
+');
+  for (const linha of linhas) {
+    // Captura: número(cod) espaço número(tp=01/03/04) espaço DESCRIÇÃO espaço [ref numérica] valor
+    const m = linha.match(/^\s*(\d+)\s+(0[134])\s+(.+?)\s+([\d.,]+)(?:\s+([\d.,]+))?\s*$/);
+    if (m) {
+      const cod  = parseInt(m[1]);
+      const tp   = parseInt(m[2]);
+      const desc = m[3].trim();
+      // Se tem 2 números no final: primeiro é referência, segundo é valor
+      // Se tem 1 número: é o valor
+      const valor = m[5] ? parseBR(m[5]) : parseBR(m[4]);
+      const ref   = m[5] ? parseBR(m[4]) : null;
+      if (valor > 0) lancamentos.push({ cod, tp, desc, ref, valor });
+    }
+  }
+  return lancamentos;
+}
+
+// Determina se uma linha de texto é uma página de resumo (ignorar)
+function isPaginaResumo(texto) {
+  return /Resumo dos Eventos|Total da Empresa|Resumo dos Valores Totais/i.test(texto);
+}
+
+// Parser principal do PDF Sênior
+// Recebe o texto completo do PDF (todas as páginas concatenadas por 
+---PAGE---
+)
+function parsePdfSenior(textoCompleto, nomeArquivo) {
+  const colaboradores = [];
+  
+  // Extrai período do topo
+  const mPeriodo = textoCompleto.match(/(\d{2})\/(\d{2})\/(\d{4})\s+a\s+\d{2}\/\d{2}\/\d{4}/);
+  const mes  = mPeriodo ? parseInt(mPeriodo[1]) : null; // dia=01 → mês
+  const mesRef = mPeriodo ? parseInt(mPeriodo[2]) : null; // mês real
+  const ano  = mPeriodo ? parseInt(mPeriodo[3]) : null;
+  const periodo = mesRef && ano ? `${String(mesRef).padStart(2,'0')}/${ano}` : '-';
+
+  // Extrai empresa do topo (linha com nome da empresa antes de "Pág.")
+  const mEmpresa = textoCompleto.match(/^(.+?)(?:\s+Pág\.:\s*\d+)/m);
+  const empresa = mEmpresa ? mEmpresa[1].trim() : '-';
+
+  // Divide o texto em blocos de colaborador
+  // Cada colaborador começa com "Colaborador: - MATRÍCULA - NOME"
+  const blocos = textoCompleto.split(/(?=Colaborador:\s*-\s*\d)/);
+
+  for (const bloco of blocos) {
+    if (!bloco.trim()) continue;
+    if (isPaginaResumo(bloco)) continue;
+
+    // Extrai matrícula e nome completo
+    // Padrão: "Colaborador: - 280000192 - BRUNO DE LIMA NUNES"
+    const mColab = bloco.match(/Colaborador:\s*-\s*(\d+)\s*-\s*([A-ZÀÁÂÃÄÇÉÊÍÓÔÕÚÜ\s]+?)(?:
+|Salário Base:|Cargo:)/i);
+    if (!mColab) continue;
+
+    const matricula = mColab[1].trim();
+    const nome      = mColab[2].trim().replace(/\s+/g,' ');
+    if (!matricula || !nome) continue;
+
+    // Cargo
+    const mCargo = bloco.match(/Cargo:\s*([A-ZÀÁÂÃÄÇÉÊÍÓÔÕÚÜ\s\d./\-]+?)(?:\s{2,}|
+)/i);
+    const cargo  = mCargo ? mCargo[1].trim() : '-';
+
+    // Salário Base
+    const mSal = bloco.match(/Salário Base:\s*([\d.,]+)/i);
+    const salarioBase = mSal ? parseBR(mSal[1]) : 0;
+
+    // Centro de Custo
+    const mCC = bloco.match(/C\.Custo:\s*(\d+)\s+([A-ZÀÁÂÃÄÇÉÊÍÓÔÕÚÜ\s\d./\-]+?)(?:
+|Estr\.)/i);
+    const ccCod  = mCC ? mCC[1].trim() : '-';
+    const ccNome = mCC ? mCC[2].trim() : '-';
+    const centroCusto = ccCod !== '-' ? `${ccCod} ${ccNome}`.trim() : '-';
+
+    // Admissão
+    const mAdm = bloco.match(/Admissão:\s*(\d{2}\/\d{2}\/\d{4})/i);
+    const admissao = mAdm ? mAdm[1] : '-';
+
+    // Status
+    const mSt = bloco.match(/St:(\S+)/i);
+    const status = mSt ? mSt[1] : '-';
+
+    // Extrai lançamentos
+    const lancamentos = extrairLancamentos(bloco);
+
+    // Classifica por tipo
+    let proventos = 0, descontos = 0, encargosEmp = 0;
+    let horasExtras = 0, valorHE = 0, adicionalNoturno = 0;
+    let fgts = 0, inssEmp = 0, ticketEmp = 0, seguroVida = 0;
+    let unimedEmp = 0, provisaoBH = 0;
+
+    for (const l of lancamentos) {
+      if (l.tp === 1) { // Proventos
+        proventos += l.valor;
+        // HE 50% ou 100%
+        if (/H\.E\.|HORA.EXTRA/i.test(l.desc)) {
+          valorHE += l.valor;
+          if (l.ref) horasExtras += l.ref;
+        }
+        // Adicional noturno
+        if (/ADICIONAL NOTURNO|AD\.NOT/i.test(l.desc)) adicionalNoturno += l.valor;
+      } else if (l.tp === 3) { // Descontos
+        descontos += l.valor;
+      } else if (l.tp === 4) { // Encargos empresa
+        encargosEmp += l.valor;
+        if (/FGTS/i.test(l.desc) && !/RESCIS|DEPOSIT/i.test(l.desc)) fgts += l.valor;
+        if (/INSS/i.test(l.desc)) inssEmp += l.valor;
+        if (/TICKET|VT|TRANSPORTE/i.test(l.desc)) ticketEmp += l.valor;
+        if (/SEGURO/i.test(l.desc)) seguroVida += l.valor;
+        if (/UNIMED|HAPVIDA|PLANO|SAUDE/i.test(l.desc)) unimedEmp += l.valor;
+        if (/PROVIS|BH/i.test(l.desc)) provisaoBH += l.valor;
+      }
+    }
+
+    // Faltas: inferidas pelo delta salário base vs provento salário
+    // Linha com cod=1 tp=01 SALARIO ref=dias_trabalhados valor=salário_proporcional
+    let diasTrabalhados = 0;
+    const lancSalario = lancamentos.find(l => l.cod === 1 && l.tp === 1);
+    if (lancSalario && lancSalario.ref) {
+      // ref é dias trabalhados (ex: 200,00 = 200 horas ou 220 horas padrão)
+      // Faltas = (salárioBase/salárioPago - 1) * 30 dias aproximado
+      diasTrabalhados = lancSalario.ref;
+    }
+    const faltas = salarioBase > 0 && lancSalario && lancSalario.valor < salarioBase
+      ? Math.round((1 - lancSalario.valor / salarioBase) * 30 * 10) / 10
+      : 0;
+
+    // Totais linha final
+    const mTotais = bloco.match(/Proventos:\s*([\d.,]+)\s+([\d.,]+)/i);
+    const totalProventos  = mTotais ? parseBR(mTotais[1]) : proventos;
+    const totalDescontos  = mTotais ? parseBR(mTotais[2]) : descontos;
+    const liquido = totalProventos - totalDescontos;
+    const custoTotal = totalProventos + encargosEmp;
+
+    // Determina nível pelo cargo
+    const nivelCargo = inferirNivel(cargo);
+
+    colaboradores.push({
+      matricula,
+      nome,
+      centro_custo: centroCusto,
+      cargo,
+      nivel_vaga:   nivelCargo,
+      tipo:         1,
+      empresa,
+      admissao,
+      status,
+      salario:      salarioBase,
+      encargos:     inssEmp + fgts,
+      beneficios:   ticketEmp + seguroVida + unimedEmp,
+      horas_extras: horasExtras,
+      valor_he:     valorHE,
+      adicional_noturno: adicionalNoturno,
+      faltas,
+      desconto_faltas: 0,
+      provisao_ferias: salarioBase > 0 ? (salarioBase/12)*PARAMS.provisoes.ferias : 0,
+      provisao_13:     salarioBase > 0 ? salarioBase/12 : 0,
+      custo_total:  custoTotal,
+      proventos:    totalProventos,
+      descontos:    totalDescontos,
+      liquido,
+      fgts,
+      inss_emp:     inssEmp,
+      encargos_emp: encargosEmp,
+      mes:          mesRef,
+      ano,
+      periodo,
+      _lancamentos: lancamentos, // guardado para debug
+    });
+  }
+
+  return colaboradores;
+}
+
+// Infere nível hierárquico a partir do cargo
+function inferirNivel(cargo) {
+  const c = String(cargo).toUpperCase();
+  if (/DIRETOR|GERENTE GERAL|CEO|SUPERINTENDENTE/.test(c))   return 'Estratégico';
+  if (/GERENTE|COORDENADOR|SUPERVISOR/.test(c))               return 'Administrativo';
+  if (/ANALISTA|ASSISTENTE|TÉCNICO|ESPECIALISTA/.test(c))     return 'Administrativo';
+  if (/ENFERMEIRO|MÉDICO|FARMACÊUTICO|FISIOTERAPEUTA/.test(c))return 'Assistencial';
+  if (/RECEPCIONISTA|OPERADOR|ARQUIVISTA|ASSIST/.test(c))     return 'Operacional';
+  return 'Operacional';
+}
+
+// Processa um PDF usando PDF.js — extrai texto de todas as páginas
+async function processPdf(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let textoCompleto = '';
+
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page  = await pdf.getPage(p);
+    const tc    = await page.getTextContent();
+    // Reconstrói texto preservando quebras de linha por posição Y
+    const items = tc.items.sort((a,b) => {
+      const dy = Math.abs(b.transform[5] - a.transform[5]);
+      if (dy > 3) return b.transform[5] - a.transform[5]; // ordena por Y decrescente
+      return a.transform[4] - b.transform[4]; // mesma linha: ordena por X
+    });
+    let lastY = null;
+    for (const item of items) {
+      const y = Math.round(item.transform[5]);
+      if (lastY !== null && Math.abs(y - lastY) > 3) textoCompleto += '
+';
+      textoCompleto += item.str + ' ';
+      lastY = y;
+    }
+    textoCompleto += '
+---PAGE---
+';
+  }
+
+  return parsePdfSenior(textoCompleto, file.name);
+}
+
+// ══════════════════════════════════════════
+// HANDLERS DE UPLOAD — PDF E EXCEL (com fila visual)
+// ══════════════════════════════════════════
+let FILE_QUEUE = []; // fila de arquivos aguardando processamento
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('over');
+  adicionarFila([...e.dataTransfer.files]);
+}
+function handleFile(e) {
+  adicionarFila([...e.target.files]);
+  e.target.value = ''; // reset so same file can be re-added
+}
+
+function adicionarFila(files) {
+  files.forEach(f => {
+    const ext = f.name.split('.').pop().toLowerCase();
+    if (['pdf','xlsx','xls'].includes(ext)) FILE_QUEUE.push(f);
+  });
+  renderFila();
+}
+
+function renderFila() {
+  const wrap = document.getElementById('file-queue-wrap');
+  const list = document.getElementById('file-queue-list');
+  const count = document.getElementById('file-queue-count');
+  if (!FILE_QUEUE.length) { wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
+  count.textContent = `(${FILE_QUEUE.length})`;
+  list.innerHTML = FILE_QUEUE.map((f,i) => {
+    const ext = f.name.split('.').pop().toLowerCase();
+    const size = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+'MB' : (f.size/1024).toFixed(0)+'KB';
+    return `<div class="file-chip ${ext}">
+      <span>${ext === 'pdf' ? '📄' : '📊'}</span>
+      <span>${f.name}</span>
+      <span style="color:var(--muted)">(${size})</span>
+      <button class="file-chip-rm" onclick="removerFila(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function removerFila(i) {
+  FILE_QUEUE.splice(i,1);
+  renderFila();
+}
+
+function limparFila() {
+  FILE_QUEUE = [];
+  renderFila();
+}
+
+function processarFila() {
+  if (!FILE_QUEUE.length) return;
+  const files = [...FILE_QUEUE];
+  FILE_QUEUE = [];
+  renderFila();
+  processFiles(files);
+}
+
+async function processFiles(files) {
+  if (!files || !files.length) return;
+
+  const prog = document.getElementById('prog-wrap');
+  const fill = document.getElementById('prog-fill');
+  const txt  = document.getElementById('prog-txt');
+  const res  = document.getElementById('result-box');
+  prog.style.display = 'block'; res.style.display = 'none';
+
+  let totalOk = 0, totalErros = 0;
+  const resultados = [];
+
+  for (let fi = 0; fi < files.length; fi++) {
+    const file = files[fi];
+    const ext  = file.name.split('.').pop().toLowerCase();
+    const pct  = Math.round((fi / files.length) * 90);
+    fill.style.width = pct + '%';
+    txt.textContent  = `Processando ${fi+1}/${files.length}: ${file.name}`;
+
+    try {
+      if (ext === 'pdf') {
+        if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js não carregado. Aguarde e tente novamente.');
+        const colabs = await processPdf(file);
+        if (!colabs.length) throw new Error('Nenhum colaborador encontrado no PDF.');
+        colabs.forEach(c => DATA.push(c));
+        totalOk += colabs.length;
+        resultados.push({ arquivo: file.name, tipo:'PDF', registros: colabs.length, status: 'Concluído', colunas_faltando: [] });
+
+      } else if (['xlsx','xls'].includes(ext)) {
+        const arrayBuf = await file.arrayBuffer();
+        const wb   = XLSX.read(arrayBuf, { type:'array', cellDates:false });
+        const ws   = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:null, raw:true });
+        if (rows.length < 2) throw new Error('Planilha vazia.');
+        let headerIdx = 0;
+        for (let i = 0; i < Math.min(10, rows.length); i++) {
+          const tc = (rows[i]||[]).filter(c => !isEmpty(c) && isNaN(Number(c)));
+          if (tc.length >= 3) { headerIdx = i; break; }
+        }
+        const headerRow = rows[headerIdx];
+        const map = mapCols(headerRow);
+        const temId  = ('nome' in map) || ('matricula' in map);
+        const temSal = 'salario' in map;
+        if (!temId)  throw new Error('Coluna de nome/matrícula não encontrada.');
+        if (!temSal) throw new Error('Coluna de salário não encontrada.');
+        let ok = 0, colsFaltando = Object.keys(COL_MAP).filter(c => !(c in map));
+        for (let i = headerIdx+1; i < rows.length; i++) {
+          if (!rows[i] || rows[i].every(c => isEmpty(c))) continue;
+          try { const row = parseRow(rows[i], map, headerRow); if (row.matricula === '-' && row.nome === '-') continue; DATA.push(row); ok++; } catch(e) { totalErros++; }
+        }
+        totalOk += ok;
+        resultados.push({ arquivo: file.name, tipo:'Excel', registros: ok, status: 'Concluído', colunas_faltando: colsFaltando });
+      } else {
+        throw new Error('Formato não suportado. Use PDF ou .xlsx');
+      }
+    } catch(err) {
+      totalErros++;
+      resultados.push({ arquivo: file.name, tipo: ext.toUpperCase(), registros: 0, status: 'Erro: ' + err.message, colunas_faltando: [] });
+    }
+  }
+
+  fill.style.width = '100%';
+  txt.textContent  = 'Concluído!';
+  resultados.forEach(r => HIST.unshift({ ...r, data: new Date().toLocaleString('pt-BR') }));
+  gerarAlertas();
+  populateFilters();
+  renderDashboard();
+  renderHistUpload();
+  atualizarDadosResumo();
+
+  const temErro = resultados.some(r => r.status.startsWith('Erro'));
+  res.className = `result-box ${temErro && totalOk === 0 ? 'result-err' : 'result-ok'}`;
+  res.style.display = 'block';
+  res.innerHTML = `✅ <b>${totalOk} colaboradores importados</b> de ${files.length} arquivo(s).`
+    + (totalErros ? `<br><small style="color:var(--red)">⚠️ ${totalErros} arquivo(s) com problema.</small>` : '')
+    + resultados.filter(r=>r.colunas_faltando?.length).map(r =>
+        `<br><small style="color:var(--orange)">${r.arquivo}: campos como " - ": ${r.colunas_faltando.join(', ')}</small>`
+      ).join('');
+  toast(`✅ ${totalOk} colaboradores importados!`);
+  setTimeout(() => { prog.style.display='none'; fill.style.width='0'; }, 2500);
+}
+
+function atualizarDadosResumo() {
+  const div = document.getElementById('dados-resumo');
+  if (!DATA.length) { div.style.display='none'; return; }
+  div.style.display = 'block';
+  document.getElementById('dados-count').textContent = DATA.length;
+  document.getElementById('dados-colab-count').textContent = new Set(DATA.map(d=>d.matricula)).size;
+}
+
+function limparDados() {
+  if (!confirm('Tem certeza? Todos os dados importados serão removidos da memória.')) return;
+  DATA.length = 0;
+  COLAB_MANUAL.length = 0;
+  gerarAlertas();
+  populateFilters();
+  renderDashboard();
+  renderColabs();
+  atualizarDadosResumo();
+  toast('🗑 Dados limpos.');
+}
+
+function limparHistorico() {
+  if (!confirm('Limpar o histórico de importações?')) return;
+  HIST.length = 0;
+  renderHistUpload();
+  toast('Histórico limpo.');
+}
+
+// ══════════════════════════════════════════
+// FILTROS
+// ══════════════════════════════════════════
+function populateFilters() {
+  const uq  = (arr, key) => [...new Set(arr.map(d => d[key]).filter(Boolean))].sort();
+  const per = uq(DATA, 'periodo');
+  const emp = uq(DATA, 'empresa');
+  const cc  = uq(DATA, 'centro_custo');
+  const niv = uq(DATA, 'nivel_vaga');
+
+  const fill = (id, vals, label) => {
+    const s = document.getElementById(id);
+    if (!s) return;
+    const cur = s.value;
+    s.innerHTML = `<option value="">${label}</option>` + vals.map(v=>`<option value="${v}">${v}</option>`).join('');
+    if (vals.includes(cur)) s.value = cur;
+  };
+
+  fill('f-periodo', per, 'Todos os Períodos');
+  fill('f-empresa', emp, 'Todas as Empresas');
+  fill('f-cc', cc, 'Todos os CCs');
+  fill('f-nivel', niv, 'Todos os Níveis');
+  fill('fc-periodo', per, 'Todos os Períodos');
+  fill('fc-empresa', emp, 'Todas as Empresas');
+  fill('fc-cc', cc, 'Todos os CCs');
+  fill('fc-nivel-colab', niv, 'Todos os Níveis');
+  fill('fc-cc-colab', cc, 'Todos os CCs');
+
+  // Header pills
+  const pList = per.join(' · ') || '—';
+  document.getElementById('h-periodo').textContent = pList;
+  document.getElementById('h-colab').textContent   = [...new Set(DATA.map(d=>d.matricula))].length;
+  // Empresa no header: prefer saved param name, fallback to data
+  const empParam = PARAMS.empresa_cond?.nome_empresa;
+  document.getElementById('h-empresa').textContent = empParam || emp[0] || '—';
+}
+
+function getFiltered(prefix='f') {
+  const p   = document.getElementById(prefix+'-periodo')?.value || '';
+  const emp = document.getElementById(prefix+'-empresa')?.value || '';
+  const cc  = document.getElementById(prefix+'-cc')?.value || '';
+  const niv = document.getElementById(prefix+'-nivel')?.value || '';
+  return DATA.filter(d =>
+    (!p   || d.periodo === p) &&
+    (!emp || d.empresa === emp) &&
+    (!cc  || d.centro_custo === cc) &&
+    (!niv || d.nivel_vaga === niv)
+  );
+}
+
+function applyFilters() { renderDashboard(); }
+function clearFilters() {
+  ['f-periodo','f-empresa','f-cc','f-nivel'].forEach(id => { const s = document.getElementById(id); if(s) s.value=''; });
+  renderDashboard();
+}
+
+// ══════════════════════════════════════════
+// DASHBOARD PRINCIPAL
+// ══════════════════════════════════════════
+function renderDashboard() {
+  const fd = getFiltered('f');
+  renderKPIs(fd);
+  renderEvolucao();
+  renderDistribuicao(fd);
+  renderCustCC(fd);
+  renderCustNivel(fd);
+  renderHeatmap(fd);
+  renderRanking(fd);
+}
+
+function renderKPIs(fd) {
+  const total = fd.reduce((a,b) => a + b.custo_total, 0);
+  const uniq  = [...new Set(fd.map(d=>d.matricula))];
+  const medio = uniq.length ? total/uniq.length : 0;
+  const he    = fd.reduce((a,b) => a + b.horas_extras, 0);
+  const heVal = fd.reduce((a,b) => a + b.valor_he, 0);
+  const faltas= fd.reduce((a,b) => a + b.faltas, 0);
+  const ferias= fd.reduce((a,b) => a + b.provisao_ferias, 0);
+  const p13   = fd.reduce((a,b) => a + b.provisao_13, 0);
+  const ccs   = [...new Set(fd.map(d=>d.centro_custo))].length;
+
+  document.getElementById('k-total').textContent  = BR(total);
+  document.getElementById('k-total-s').textContent= `${ccs} centros de custo`;
+  document.getElementById('k-medio').textContent  = BR(medio);
+  document.getElementById('k-medio-s').textContent= `${uniq.length} colaboradores`;
+  document.getElementById('k-he').textContent     = NUM(he) + 'h';
+  document.getElementById('k-he-s').textContent   = BR(heVal) + ' em valor';
+  document.getElementById('k-faltas').textContent = NUM(faltas);
+  document.getElementById('k-ferias').textContent = BR(ferias);
+  document.getElementById('k-13').textContent     = BR(p13);
+}
+
+function renderEvolucao() {
+  const byPer = {};
+  DATA.forEach(d => {
+    if (!byPer[d.periodo]) byPer[d.periodo] = { total:0, colab:new Set() };
+    byPer[d.periodo].total += d.custo_total;
+    byPer[d.periodo].colab.add(d.matricula);
+  });
+  const labels = Object.keys(byPer).sort();
+  const totals = labels.map(p => byPer[p].total);
+  const medios = labels.map(p => byPer[p].total / byPer[p].colab.size);
+  destroyChart('evolucao');
+  if (!labels.length) return;
+  const ctx = document.getElementById('c-evolucao').getContext('2d');
+  CHARTS.evolucao = new Chart(ctx, {
+    type:'line', data:{ labels, datasets:[
+      { label:'Custo Total', data:totals, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,.08)', borderWidth:2.5, fill:true, tension:0.4, pointRadius:5, pointBackgroundColor:'#3b82f6' },
+      { label:'Custo Médio', data:medios, borderColor:'#22c55e', backgroundColor:'transparent', borderWidth:2, borderDash:[5,3], tension:0.4, pointRadius:4, pointBackgroundColor:'#22c55e' }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:CD.color, font:{family:CD.font,size:11}, boxWidth:12 }}},
+      scales:{ x:{ grid:{color:CD.grid}, ticks:{color:CD.color,font:{family:CD.font,size:11}} }, y:{ grid:{color:CD.grid}, ticks:{color:CD.color,font:{family:CD.font,size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'} } } }
+  });
+}
+
+function renderDistribuicao(fd) {
+  const keys = ['salario','encargos','beneficios','valor_he','adicional_noturno','provisao_ferias','provisao_13'];
+  const lbls  = ['Salário','Encargos','Benefícios','H.Extras','Ad.Noturno','Prov.Férias','Prov.13º'];
+  const vals  = keys.map(k => fd.reduce((a,b) => a+(b[k]||0),0));
+  const colors= ['#3b82f6','#f97316','#22c55e','#eab308','#a855f7','#06b6d4','#14b8a6'];
+  destroyChart('dist');
+  if (!fd.length) return;
+  CHARTS.dist = new Chart(document.getElementById('c-dist').getContext('2d'), {
+    type:'doughnut', data:{ labels:lbls, datasets:[{ data:vals, backgroundColor:colors, borderWidth:0, hoverOffset:6 }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{ legend:{ position:'right', labels:{ color:CD.color, font:{family:CD.font,size:10}, boxWidth:10, padding:8 }}}}
+  });
+}
+
+function renderCustCC(fd) {
+  const by = {};
+  fd.forEach(d => { by[d.centro_custo] = (by[d.centro_custo]||0)+d.custo_total; });
+  const sorted = Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  destroyChart('cc');
+  if (!sorted.length) return;
+  CHARTS.cc = new Chart(document.getElementById('c-cc').getContext('2d'), {
+    type:'bar', data:{ labels:sorted.map(x=>x[0]), datasets:[{ data:sorted.map(x=>x[1]), backgroundColor:sorted.map((_,i)=>`hsl(${215-i*12},65%,${55-i*2}%)`), borderRadius:5, borderSkipped:false }]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ x:{ grid:{color:CD.grid}, ticks:{color:CD.color,font:{family:CD.font,size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'} }, y:{ grid:{display:false}, ticks:{color:CD.color,font:{family:CD.font,size:10}} } } }
+  });
+}
+
+function renderCustNivel(fd) {
+  const by = {};
+  fd.forEach(d => { by[d.nivel_vaga||'—'] = (by[d.nivel_vaga||'—']||0)+d.custo_total; });
+  const sorted = Object.entries(by).sort((a,b)=>b[1]-a[1]);
+  destroyChart('nivel');
+  if (!sorted.length) return;
+  const colors = ['#3b82f6','#f97316','#22c55e','#a855f7','#14b8a6'];
+  CHARTS.nivel = new Chart(document.getElementById('c-nivel').getContext('2d'), {
+    type:'doughnut', data:{ labels:sorted.map(x=>x[0]), datasets:[{ data:sorted.map(x=>x[1]), backgroundColor:colors, borderWidth:0, hoverOffset:6 }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'55%', plugins:{ legend:{ position:'bottom', labels:{ color:CD.color, font:{family:CD.font,size:10}, boxWidth:10, padding:8 }}}}
+  });
+}
+
+function renderHeatmap(fd) {
+  const meses = [...new Set(fd.map(d=>d.periodo).filter(Boolean))].sort();
+  const ccs   = [...new Set(fd.map(d=>d.centro_custo).filter(Boolean))];
+  const tbl   = document.getElementById('heatmap');
+  if (!meses.length) { tbl.innerHTML=''; return; }
+  const max = Math.max(...fd.map(d=>d.custo_total));
+  let html = `<thead><tr><th>Centro de Custo</th>${meses.map(m=>`<th>${m}</th>`).join('')}</tr></thead><tbody>`;
+  ccs.forEach(cc => {
+    html += `<tr><td class="lbl">${cc}</td>`;
+    meses.forEach(m => {
+      const rows = fd.filter(d=>d.centro_custo===cc&&d.periodo===m);
+      if (!rows.length) { html+=`<td class="hm-">—</td>`; return; }
+      const val = rows.reduce((a,b)=>a+b.custo_total,0);
+      const r = val/max;
+      const cls = r<0.25?'hm0':r<0.5?'hm1':r<0.75?'hm2':'hm3';
+      html+=`<td class="${cls}" title="${cc} ${m}: ${BR(val)}">${(val/1000).toFixed(0)}k</td>`;
+    });
+    html += '</tr>';
+  });
+  tbl.innerHTML = html+'</tbody>';
+}
+
+function renderRanking(fd) {
+  const byColab = {};
+  fd.forEach(d => {
+    if (!byColab[d.matricula]) byColab[d.matricula] = {...d, custo_total:0, horas_extras:0, faltas:0, valor_he:0};
+    byColab[d.matricula].custo_total += d.custo_total;
+    byColab[d.matricula].horas_extras += d.horas_extras;
+    byColab[d.matricula].faltas += d.faltas;
+    byColab[d.matricula].valor_he += d.valor_he;
+  });
+  const sorted = Object.values(byColab).sort((a,b)=>b.custo_total-a.custo_total).slice(0,20);
+  const nivelTag = { Operacional:'tb', Administrativo:'to', Assistencial:'tm', Estratégico:'tp' };
+  const cores = ['🥇','🥈','🥉'];
+  document.getElementById('tb-ranking').innerHTML = sorted.map((r,i) => {
+    const cond = custoCondominio(r);
+    const emp  = r.custo_total - cond;
+    const pct  = getPctCargo(r.cargo);
+    const empPct = 100-pct;
+    return `<tr>
+      <td class="mono">${cores[i]||'#'+(i+1)}</td>
+      <td class="mono">${r.matricula}</td>
+      <td><b>${r.nome}</b></td>
+      <td>${r.cargo}</td>
+      <td><span class="tag ${nivelTag[r.nivel_vaga]||'tm'}">${r.nivel_vaga}</span></td>
+      <td>${r.centro_custo}</td>
+      <td class="mono">${BR(r.salario)}</td>
+      <td class="mono">${BR(r.encargos)}</td>
+      <td class="mono">${BR(r.beneficios)}</td>
+      <td class="mono ${r.horas_extras>20?'to':''}">${NUM(r.horas_extras)}h</td>
+      <td class="mono ${r.faltas>=3?'tr':''}">${NUM(r.faltas)}d</td>
+      <td class="mono" style="color:var(--blue)">${BR(emp)}</td>
+      <td class="mono" style="color:var(--purple)">${BR(cond)} <small style="opacity:.6">${pct}%</small></td>
+      <td class="mono" style="font-weight:700;color:var(--cyan)">${BR(r.custo_total)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="14" style="text-align:center;color:var(--muted);padding:30px">Nenhum dado disponível. Faça o upload da planilha.</td></tr>';
+}
+
+// ══════════════════════════════════════════
+// EMPRESA VS CONDOMÍNIO
+// ══════════════════════════════════════════
+function renderCondominio() {
+  const per = document.getElementById('fc-periodo')?.value||'';
+  const cc  = document.getElementById('fc-cc')?.value||'';
+  const fd  = DATA.filter(d => (!per||d.periodo===per)&&(!cc||d.centro_custo===cc));
+
+  const totalCusto  = fd.reduce((a,b)=>a+b.custo_total,0);
+  const totalCond   = fd.reduce((a,b)=>a+custoCondominio(b),0);
+  const totalEmp    = totalCusto - totalCond;
+  const pctCond     = totalCusto ? (totalCond/totalCusto*100).toFixed(1) : 0;
+  const pctEmp      = totalCusto ? (totalEmp/totalCusto*100).toFixed(1) : 0;
+  const pctMedCond  = fd.length ? (fd.reduce((a,b)=>a+getPctCargo(b.cargo),0)/fd.length).toFixed(1) : 0;
+
+  document.getElementById('ck-total').textContent   = BR(totalCusto);
+  document.getElementById('ck-empresa').textContent  = BR(totalEmp);
+  document.getElementById('ck-empresa-pct').textContent = `${pctEmp}% do total`;
+  document.getElementById('ck-cond').textContent     = BR(totalCond);
+  document.getElementById('ck-cond-pct').textContent  = `${pctCond}% do total`;
+  document.getElementById('ck-pct-medio').textContent = pctMedCond + '%';
+
+  // Pie
+  destroyChart('cond-pie');
+  if (fd.length) {
+    CHARTS['cond-pie'] = new Chart(document.getElementById('c-cond-pie').getContext('2d'), {
+      type:'doughnut', data:{ labels:['Custo Empresa','Custo Condomínio'], datasets:[{ data:[totalEmp,totalCond], backgroundColor:['#3b82f6','#a855f7'], borderWidth:0, hoverOffset:6 }]},
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{ legend:{ position:'bottom', labels:{ color:CD.color, font:{family:CD.font,size:11}, boxWidth:12, padding:10 }}}}
+    });
+  }
+
+  // Stacked bar por CC
+  const byCc = {};
+  fd.forEach(d => {
+    if (!byCc[d.centro_custo]) byCc[d.centro_custo] = {emp:0,cond:0};
+    byCc[d.centro_custo].emp  += d.custo_total - custoCondominio(d);
+    byCc[d.centro_custo].cond += custoCondominio(d);
+  });
+  const ccLabels = Object.keys(byCc).sort();
+  destroyChart('cond-cc');
+  if (ccLabels.length) {
+    CHARTS['cond-cc'] = new Chart(document.getElementById('c-cond-cc').getContext('2d'), {
+      type:'bar', data:{ labels:ccLabels, datasets:[
+        { label:'Empresa', data:ccLabels.map(c=>byCc[c].emp), backgroundColor:'rgba(59,130,246,.75)', borderRadius:4 },
+        { label:'Condomínio', data:ccLabels.map(c=>byCc[c].cond), backgroundColor:'rgba(168,85,247,.75)', borderRadius:4 }
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:CD.color, font:{family:CD.font,size:11}, boxWidth:12 }}},
+        scales:{ x:{ stacked:true, grid:{display:false}, ticks:{color:CD.color,font:{family:CD.font,size:10}} }, y:{ stacked:true, grid:{color:CD.grid}, ticks:{color:CD.color,font:{family:CD.font,size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'} } }
+      }
+    });
+  }
+
+  // Tabela detalhada
+  const byColab = {};
+  fd.forEach(d => {
+    if (!byColab[d.matricula]) byColab[d.matricula] = {...d, custo_total:0};
+    byColab[d.matricula].custo_total += d.custo_total;
+  });
+  const rows = Object.values(byColab).sort((a,b)=>b.custo_total-a.custo_total);
+  document.getElementById('tb-cond').innerHTML = rows.map(r => {
+    const cond = custoCondominio(r);
+    const emp  = r.custo_total - cond;
+    const pct  = getPctCargo(r.cargo);
+    const empPct = (100-pct).toFixed(0);
+    const condPct= pct.toFixed(0);
+    const barEmp  = empPct;
+    const barCond = condPct;
+    return `<tr>
+      <td class="mono">${r.matricula}</td>
+      <td><b>${r.nome}</b></td>
+      <td>${r.cargo}</td>
+      <td><span class="tag tp">${pct}%</span></td>
+      <td>${r.centro_custo}</td>
+      <td class="mono" style="font-weight:700">${BR(r.custo_total)}</td>
+      <td class="mono" style="color:var(--blue)">${BR(emp)}</td>
+      <td class="mono" style="color:var(--purple)">${BR(cond)}</td>
+      <td style="min-width:120px">
+        <div class="split-bar">
+          <div class="split-empresa" style="width:${barEmp}%"></div>
+          <div class="split-cond" style="width:${barCond}%"></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">
+          <span style="color:var(--blue)">${empPct}%</span> Emp · <span style="color:var(--purple)">${condPct}%</span> Cond
+        </div>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:30px">Faça o upload para visualizar.</td></tr>';
+}
+
+// ══════════════════════════════════════════
+// ALERTAS
+// ══════════════════════════════════════════
+function gerarAlertas() {
+  ALERTAS = [];
+  const media = DATA.length ? DATA.reduce((a,b)=>a+b.custo_total,0)/DATA.length : 0;
+
+  // Por colaborador
+  const byColab = {};
+  DATA.forEach(d => {
+    if (!byColab[d.matricula]) byColab[d.matricula] = {...d, horas_extras:0, faltas:0, custo_total:0};
+    byColab[d.matricula].horas_extras += d.horas_extras;
+    byColab[d.matricula].faltas += d.faltas;
+    byColab[d.matricula].custo_total += d.custo_total;
+  });
+
+  Object.values(byColab).forEach(r => {
+    if (r.horas_extras > PARAMS.alertas.he_atencao) {
+      const sev = r.horas_extras >= PARAMS.alertas.he_critico ? 'critico' : 'atencao';
+      ALERTAS.push({ tipo:'horas_extras', sev, msg:`${r.nome} (${r.matricula}): ${NUM(r.horas_extras)}h extras`, detalhe:`CC: ${r.centro_custo}` });
+    }
+    if (r.faltas > PARAMS.alertas.faltas_atencao) {
+      const sev = r.faltas >= PARAMS.alertas.faltas_critico ? 'critico' : 'atencao';
+      ALERTAS.push({ tipo:'absenteismo', sev, msg:`${r.nome} (${r.matricula}): ${NUM(r.faltas)} falta(s)`, detalhe:`CC: ${r.centro_custo}` });
+    }
+    if (media > 0 && r.custo_total > media * PARAMS.alertas.custo_mult) {
+      ALERTAS.push({ tipo:'custo_elevado', sev:'atencao', msg:`${r.nome}: custo ${(r.custo_total/media).toFixed(1)}× acima da média`, detalhe:`${BR(r.custo_total)} vs média ${BR(media)}` });
+    }
+  });
+
+  // Concentração CC
+  const byCc = {};
+  DATA.forEach(d => { byCc[d.centro_custo] = (byCc[d.centro_custo]||0)+d.custo_total; });
+  const totalGeral = Object.values(byCc).reduce((a,b)=>a+b,0);
+  Object.entries(byCc).forEach(([cc, val]) => {
+    const pct = totalGeral ? val/totalGeral*100 : 0;
+    if (pct >= PARAMS.alertas.conc_cc) {
+      ALERTAS.push({ tipo:'concentracao', sev:'atencao', msg:`CC "${cc}" concentra ${pct.toFixed(1)}% da folha`, detalhe:`${BR(val)} de ${BR(totalGeral)}` });
+    }
+  });
+
+  const badge = document.getElementById('badge-alert');
+  if (ALERTAS.length) { badge.style.display='inline'; badge.textContent=ALERTAS.length; }
+  else badge.style.display='none';
+}
+
+function renderAlertas() {
+  const tipo = document.getElementById('fa-tipo')?.value||'';
+  const sev  = document.getElementById('fa-sev')?.value||'';
+  const filtered = ALERTAS.filter(a => (!tipo||a.tipo===tipo)&&(!sev||a.sev===sev));
+  const critico  = filtered.filter(a=>a.sev==='critico').length;
+  const atencao  = filtered.filter(a=>a.sev==='atencao').length;
+
+  document.getElementById('alert-resumo').innerHTML = `
+    <div class="alert-card critico"><div class="alert-num">${critico}</div><div class="alert-lbl">🔴 Críticos</div></div>
+    <div class="alert-card atencao"><div class="alert-num">${atencao}</div><div class="alert-lbl">🟠 Atenção</div></div>
+    <div class="alert-card"><div class="alert-num" style="color:var(--muted)">${filtered.length}</div><div class="alert-lbl">Total</div></div>
+  `;
+
+  const tipoLabel = { horas_extras:'⏱ Horas Extras', absenteismo:'📅 Absenteísmo', custo_elevado:'💰 Custo Elevado', concentracao:'📊 Concentração CC' };
+  document.getElementById('alert-lista').innerHTML = filtered.length
+    ? filtered.map((a,i) => `
+        <div class="alert-item ${a.sev}">
+          <div>
+            <div class="alert-tipo">${tipoLabel[a.tipo]||a.tipo}</div>
+            <div class="alert-msg">${a.msg}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">${a.detalhe}</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            ${a.tipo==='manual'?`<button class="btn-sm" style="color:var(--cyan);border-color:rgba(6,182,212,.3)" onclick="editarAlerta(${ALERTAS.indexOf(a)})">✏ Editar</button>`:''}
+            <button class="btn-sm" onclick="resolverAlerta(${ALERTAS.indexOf(a)},this)">✓ Resolver</button>
+          </div>
+        </div>`).join('')
+    : '<div style="text-align:center;padding:40px;color:var(--muted)">✅ Nenhum alerta ativo.</div>';
+}
+
+function resolverAlerta(i, btn) {
+  ALERTAS.splice(i,1);
+  renderAlertas();
+  toast('Alerta resolvido.');
+}
+
+// ── Modal Alertas ────────────────────────────────────────
+function abrirModalAlerta(idx) {
+  const modal = document.getElementById('modal-alerta');
+  modal.style.display = 'flex';
+  document.getElementById('ma-edit-idx').value = idx !== undefined ? idx : '';
+  if (idx !== undefined) {
+    const a = ALERTAS[idx];
+    document.getElementById('modal-alerta-title').textContent = 'Editar Alerta';
+    document.getElementById('ma-sev').value    = a.sev;
+    document.getElementById('ma-tipo').value   = a.tipo;
+    document.getElementById('ma-msg').value    = a.msg;
+    document.getElementById('ma-detalhe').value= a.detalhe||'';
+  } else {
+    document.getElementById('modal-alerta-title').textContent = 'Novo Alerta Manual';
+    document.getElementById('ma-sev').value    = 'atencao';
+    document.getElementById('ma-tipo').value   = 'manual';
+    document.getElementById('ma-msg').value    = '';
+    document.getElementById('ma-detalhe').value= '';
+  }
+}
+function fecharModalAlerta() { document.getElementById('modal-alerta').style.display = 'none'; }
+function editarAlerta(i) { abrirModalAlerta(i); }
+function salvarAlerta() {
+  const msg = document.getElementById('ma-msg').value.trim();
+  if (!msg) { toast('Mensagem obrigatória!', false); return; }
+  const obj = {
+    sev:    document.getElementById('ma-sev').value,
+    tipo:   document.getElementById('ma-tipo').value,
+    msg,
+    detalhe: document.getElementById('ma-detalhe').value.trim()
+  };
+  const idx = document.getElementById('ma-edit-idx').value;
+  if (idx !== '') ALERTAS[parseInt(idx)] = obj;
+  else ALERTAS.unshift(obj);
+  fecharModalAlerta();
+  renderAlertas();
+  const badge = document.getElementById('badge-alert');
+  badge.style.display='inline'; badge.textContent=ALERTAS.length;
+  toast('✅ Alerta salvo!');
+}
+
+// ══════════════════════════════════════════
+// COLABORADORES
+// ══════════════════════════════════════════
+function renderColabs() {
+  const q   = (document.getElementById('busca-colab')?.value||'').toLowerCase();
+  const niv = document.getElementById('fc-nivel-colab')?.value||'';
+  const cc  = document.getElementById('fc-cc-colab')?.value||'';
+  const byColab = {};
+  DATA.forEach(d => {
+    if (!byColab[d.matricula]) byColab[d.matricula] = {...d, custo_total:0, horas_extras:0, faltas:0};
+    byColab[d.matricula].custo_total  += d.custo_total;
+    byColab[d.matricula].horas_extras += d.horas_extras;
+    byColab[d.matricula].faltas       += d.faltas;
+  });
+  const rows = Object.values(byColab).filter(r =>
+    (!q  || r.nome.toLowerCase().includes(q) || r.matricula.toLowerCase().includes(q)) &&
+    (!niv|| r.nivel_vaga === niv) &&
+    (!cc || r.centro_custo === cc)
+  ).sort((a,b)=>b.custo_total-a.custo_total);
+
+  document.getElementById('colab-titulo').textContent = `Colaboradores (${rows.length})`;
+  const nivelTag = { Operacional:'tb', Administrativo:'to', Assistencial:'tm', Estratégico:'tp' };
+  const statusTag = { Ativo:'tg', Desligado:'tr', Afastado:'to', 'Férias':'tp' };
+  document.getElementById('tb-colab').innerHTML = rows.map(r => {
+    const cond  = custoCondominio(r);
+    const emp   = r.custo_total - cond;
+    const pct   = getPctCargo(r.cargo);
+    const st    = r._status || 'Ativo';
+    const manualIdx = COLAB_MANUAL.findIndex(c => c.matricula === r.matricula);
+    const acoes = manualIdx >= 0
+      ? `<td><button class="btn-sm" style="color:var(--cyan);border-color:rgba(6,182,212,.3)" onclick="abrirModalColab(${manualIdx})">✏ Editar</button></td>`
+      : `<td><button class="btn-sm" style="opacity:.4;cursor:default" title="Importado via planilha/PDF">—</button></td>`;
+    return `<tr style="${st==='Desligado'?'opacity:.5':''}">
+      <td class="mono">${r.matricula}</td>
+      <td><b>${r.nome}</b></td>
+      <td>${r.cargo}</td>
+      <td><span class="tag ${nivelTag[r.nivel_vaga]||'tm'}">${r.nivel_vaga||'—'}</span></td>
+      <td>${r.centro_custo}</td>
+      <td class="mono">${BR(r.salario)}</td>
+      <td class="mono" style="font-weight:700;color:var(--cyan)">${BR(r.custo_total)}</td>
+      <td><span class="tag tp">${pct}%</span></td>
+      <td class="mono" style="color:var(--blue)">${BR(emp)}</td>
+      <td class="mono" style="color:var(--purple)">${BR(cond)}</td>
+      <td class="mono ${r.horas_extras>20?'to':''}">${NUM(r.horas_extras)}h</td>
+      <td class="mono ${r.faltas>=3?'tr':''}">${NUM(r.faltas)}d</td>
+      <td><span class="tag ${statusTag[st]||'tm'}">${st}</span></td>
+      ${acoes}
+    </tr>`;
+  }).join('') || '<tr><td colspan="14" style="text-align:center;color:var(--muted);padding:30px">Nenhum colaborador encontrado.</td></tr>';
+}
+
+// ══════════════════════════════════════════
+// HISTÓRICO DE UPLOADS
+// ══════════════════════════════════════════
+function renderHistUpload() {
+  const tbody = document.getElementById('tb-hist');
+  if (!HIST.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px">Nenhum upload realizado ainda.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = HIST.map(h => {
+    const isErr = h.status.startsWith('Erro');
+    const avisos = h.colunas_faltando?.length
+      ? `<br><small style="color:var(--orange)">Campos ausentes: ${h.colunas_faltando.map(c=>c.replace(/_/g,' ')).join(', ')}</small>`
+      : (!isErr ? `<small style="color:var(--green)"> ✓ Todas as colunas identificadas</small>` : '');
+    const tipoCls = h.tipo === 'PDF' ? 'tr' : 'tg';
+    return `<tr>
+      <td class="mono" style="white-space:nowrap">${h.data}</td>
+      <td>${h.arquivo}${avisos}</td>
+      <td><span class="tag ${tipoCls}">${h.tipo||'—'}</span></td>
+      <td class="mono">${h.registros}</td>
+      <td><span class="tag ${isErr?'tr':'tg'}">${isErr ? 'Erro' : 'OK'}</span>${isErr?`<br><small style="color:var(--red)">${h.status.replace('Erro: ','')}</small>`:''}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// EXPORTS
+// ══════════════════════════════════════════
+function exportCSV() {
+  const fd = getFiltered('f');
+  const hdr = 'Matricula,Nome,Cargo,Nivel,CC,Salario,Encargos,Beneficios,HExtras,Faltas,CustoEmpresa,CustoCondominio,CustoTotal';
+  const rows = fd.map(r => {
+    const cond=custoCondominio(r), emp=r.custo_total-cond;
+    return [r.matricula,r.nome,r.cargo,r.nivel_vaga,r.centro_custo,r.salario.toFixed(2),r.encargos.toFixed(2),r.beneficios.toFixed(2),r.horas_extras,r.faltas,emp.toFixed(2),cond.toFixed(2),r.custo_total.toFixed(2)].join(',');
+  });
+  const blob = new Blob([hdr+'\n'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`rh_custos_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  toast('📥 CSV exportado!');
+}
+
+function exportCondCSV() {
+  const fd = DATA;
+  const hdr = 'Matricula,Nome,Cargo,PctCondominio,CC,CustoTotal,CustoEmpresa,CustoCondominio';
+  const rows = fd.map(r => {
+    const cond=custoCondominio(r), emp=r.custo_total-cond, pct=getPctCargo(r.cargo);
+    return [r.matricula,r.nome,r.cargo,pct,r.centro_custo,r.custo_total.toFixed(2),emp.toFixed(2),cond.toFixed(2)].join(',');
+  });
+  const blob = new Blob([hdr+'\n'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`condominio_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  toast('📥 CSV do Condomínio exportado!');
+}
+
+// ══════════════════════════════════════════
+// EMPRESA × CONDOMÍNIO — PARÂMETROS
+// ══════════════════════════════════════════
+function renderParamEmpresaCond() {
+  const wrap = document.getElementById('param-empresa-cond-wrap');
+  if (!wrap) return;
+  const ec = PARAMS.empresa_cond || { nome_empresa: '', nome_condominio: '', cnpj_empresa: '', cnpj_condominio: '', resp_empresa: '', resp_condominio: '' };
+  wrap.innerHTML = `
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)">🏢 Empresa</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">Razão Social</label>
+              <input type="text" id="ec-nome-empresa" value="${ec.nome_empresa}" placeholder="Nome da empresa..." style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;font-family:var(--font);font-size:12px;outline:none" oninput="saveEmpresaCond()">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">CNPJ</label>
+              <input type="text" id="ec-cnpj-empresa" value="${ec.cnpj_empresa}" placeholder="00.000.000/0001-00" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;font-family:var(--font);font-size:12px;outline:none" oninput="saveEmpresaCond()">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">Responsável RH</label>
+              <input type="text" id="ec-resp-empresa" value="${ec.resp_empresa}" placeholder="Nome do responsável..." style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;font-family:var(--font);font-size:12px;outline:none" oninput="saveEmpresaCond()">
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--purple);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)">🏗️ Condomínio</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">Nome do Condomínio</label>
+              <input type="text" id="ec-nome-cond" value="${ec.nome_condominio}" placeholder="Nome do condomínio..." style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;font-family:var(--font);font-size:12px;outline:none" oninput="saveEmpresaCond()">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">CNPJ</label>
+              <input type="text" id="ec-cnpj-cond" value="${ec.cnpj_condominio}" placeholder="00.000.000/0001-00" style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;font-family:var(--font);font-size:12px;outline:none" oninput="saveEmpresaCond()">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">Síndico / Responsável</label>
+              <input type="text" id="ec-resp-cond" value="${ec.resp_condominio}" placeholder="Nome do síndico..." style="width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;font-family:var(--font);font-size:12px;outline:none" oninput="saveEmpresaCond()">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;text-align:right">
+        <span id="ec-saved-msg" style="font-size:11px;color:var(--green);display:none">✓ Salvo automaticamente</span>
+      </div>
+    </div>`;
+}
+
+function saveEmpresaCond() {
+  PARAMS.empresa_cond = {
+    nome_empresa:    document.getElementById('ec-nome-empresa')?.value||'',
+    cnpj_empresa:    document.getElementById('ec-cnpj-empresa')?.value||'',
+    resp_empresa:    document.getElementById('ec-resp-empresa')?.value||'',
+    nome_condominio: document.getElementById('ec-nome-cond')?.value||'',
+    cnpj_condominio: document.getElementById('ec-cnpj-cond')?.value||'',
+    resp_condominio: document.getElementById('ec-resp-cond')?.value||''
+  };
+  localStorage.setItem('rh_params', JSON.stringify(PARAMS));
+  // Update header
+  const nomeEmp = PARAMS.empresa_cond.nome_empresa || '—';
+  document.getElementById('h-empresa').textContent = nomeEmp;
+  const msg = document.getElementById('ec-saved-msg');
+  if (msg) { msg.style.display='inline'; setTimeout(()=>{ msg.style.display='none'; }, 2000); }
+}
+
+// ══════════════════════════════════════════
+// COLABORADORES — MODAL CONTRATAR / EDITAR / DESLIGAR
+// ══════════════════════════════════════════
+let COLAB_MANUAL = []; // colaboradores adicionados manualmente
+
+function abrirModalColab(idx) {
+  const modal = document.getElementById('modal-colab');
+  modal.style.display = 'flex';
+  document.getElementById('mc-edit-idx').value = idx !== null && idx !== undefined ? idx : '';
+  document.getElementById('btn-modal-demit').style.display   = idx !== null && idx !== undefined ? 'inline-block' : 'none';
+  document.getElementById('btn-modal-excluir').style.display = idx !== null && idx !== undefined ? 'inline-block' : 'none';
+  document.getElementById('modal-colab-demit').style.display = 'none';
+  if (idx !== null && idx !== undefined) {
+    const r = COLAB_MANUAL[idx];
+    document.getElementById('modal-colab-title').textContent = 'Editar Colaborador';
+    document.getElementById('mc-matricula').value  = r.matricula||'';
+    document.getElementById('mc-nome').value       = r.nome||'';
+    document.getElementById('mc-cargo').value      = r.cargo||'';
+    document.getElementById('mc-nivel').value      = r.nivel_vaga||'Operacional';
+    document.getElementById('mc-cc').value         = r.centro_custo||'';
+    document.getElementById('mc-salario').value    = r.salario||'';
+    document.getElementById('mc-encargos').value   = r.encargos||'';
+    document.getElementById('mc-beneficios').value = r.beneficios||'';
+    document.getElementById('mc-he').value         = r.horas_extras||'';
+    document.getElementById('mc-faltas').value     = r.faltas||'';
+    document.getElementById('mc-periodo').value    = r.periodo||'';
+    document.getElementById('mc-status').value     = r._status||'Ativo';
+  } else {
+    document.getElementById('modal-colab-title').textContent = 'Contratar Colaborador';
+    ['mc-matricula','mc-nome','mc-cargo','mc-cc','mc-periodo'].forEach(id => document.getElementById(id).value='');
+    ['mc-salario','mc-encargos','mc-beneficios','mc-he','mc-faltas'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('mc-nivel').value  = 'Operacional';
+    document.getElementById('mc-status').value = 'Ativo';
+  }
+}
+
+function fecharModalColab() {
+  document.getElementById('modal-colab').style.display = 'none';
+}
+
+function excluirColab() {
+  const idx = parseInt(document.getElementById('mc-edit-idx').value);
+  if (isNaN(idx)) return;
+  const colab = COLAB_MANUAL[idx];
+  if (!confirm(`Excluir colaborador "${colab.nome}"? Esta ação não pode ser desfeita.`)) return;
+  // Remove from COLAB_MANUAL
+  COLAB_MANUAL.splice(idx, 1);
+  // Remove from DATA (all entries for this matricula that are manual)
+  for (let i = DATA.length - 1; i >= 0; i--) {
+    if (DATA[i].matricula === colab.matricula && DATA[i]._manual) DATA.splice(i, 1);
+  }
+  fecharModalColab();
+  gerarAlertas();
+  populateFilters();
+  renderDashboard();
+  renderColabs();
+  toast(`🗑 ${colab.nome} excluído.`);
+}
+
+function toggleDemissao() {
+  const div = document.getElementById('modal-colab-demit');
+  div.style.display = div.style.display === 'none' ? 'block' : 'none';
+  // Set status to Desligado automatically
+  if (div.style.display === 'block') document.getElementById('mc-status').value = 'Desligado';
+}
+
+function salvarColab() {
+  const matricula = document.getElementById('mc-matricula').value.trim();
+  const nome      = document.getElementById('mc-nome').value.trim();
+  const cargo     = document.getElementById('mc-cargo').value.trim();
+  if (!matricula || !nome || !cargo) { toast('Matrícula, Nome e Cargo são obrigatórios!', false); return; }
+
+  const salario    = parseFloat(document.getElementById('mc-salario').value)||0;
+  const encargos   = parseFloat(document.getElementById('mc-encargos').value)||0;
+  const beneficios = parseFloat(document.getElementById('mc-beneficios').value)||0;
+  const he         = parseFloat(document.getElementById('mc-he').value)||0;
+  const faltas     = parseFloat(document.getElementById('mc-faltas').value)||0;
+  const periodo    = document.getElementById('mc-periodo').value.trim() || new Date().toLocaleDateString('pt-BR',{month:'2-digit',year:'numeric'}).replace('/','./').replace('./','/');
+  const status     = document.getElementById('mc-status').value;
+
+  const heVal      = he * (salario / PARAMS.provisoes.hdiv) * PARAMS.provisoes.he_mult;
+  const custoTotal = salario + encargos + beneficios + heVal;
+  const mParts     = periodo.match(/^(\d{2})\/(\d{4})$/);
+  const mes        = mParts ? parseInt(mParts[1]) : null;
+  const ano        = mParts ? parseInt(mParts[2]) : null;
+
+  const obj = {
+    matricula, nome, cargo,
+    nivel_vaga:   document.getElementById('mc-nivel').value,
+    centro_custo: document.getElementById('mc-cc').value.trim(),
+    salario, encargos, beneficios,
+    horas_extras: he, valor_he: heVal,
+    adicional_noturno: 0,
+    faltas, desconto_faltas: 0,
+    provisao_ferias: salario > 0 ? (salario/12)*PARAMS.provisoes.ferias : 0,
+    provisao_13:     salario > 0 ? salario/12 : 0,
+    custo_total: custoTotal,
+    periodo, mes, ano, tipo: 1,
+    _status: status,
+    _manual: true
+  };
+
+  const idx = document.getElementById('mc-edit-idx').value;
+  if (idx !== '') {
+    COLAB_MANUAL[parseInt(idx)] = obj;
+    // Update in DATA too
+    const dataIdx = DATA.findIndex(d => d.matricula === obj.matricula && d._manual);
+    if (dataIdx >= 0) DATA[dataIdx] = obj;
+  } else {
+    COLAB_MANUAL.push(obj);
+    DATA.push(obj);
+  }
+
+  fecharModalColab();
+  gerarAlertas();
+  populateFilters();
+  renderDashboard();
+  renderColabs();
+  toast(`✅ ${status === 'Desligado' ? 'Colaborador desligado!' : 'Colaborador salvo!'}`);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+(function init() {
+  const saved = localStorage.getItem('rh_params');
+  if (saved) { try { PARAMS = JSON.parse(saved); } catch(e){} }
+  // Ensure empresa_cond exists
+  if (!PARAMS.empresa_cond) PARAMS.empresa_cond = { nome_empresa:'', cnpj_empresa:'', resp_empresa:'', nome_condominio:'', cnpj_condominio:'', resp_condominio:'' };
+  // Update header empresa
+  const nomeEmp = PARAMS.empresa_cond.nome_empresa || '—';
+  document.getElementById('h-empresa').textContent = nomeEmp;
+  renderPctCargos();
+  renderHistUpload();
+  renderDashboard();
+  renderAlertas();
+  atualizarDadosResumo();
+  // Close modals on backdrop click
+  document.getElementById('modal-colab').addEventListener('click', function(e){ if(e.target===this) fecharModalColab(); });
+  document.getElementById('modal-alerta').addEventListener('click', function(e){ if(e.target===this) fecharModalAlerta(); });
+  // Close modals on Escape key
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') { fecharModalColab(); fecharModalAlerta(); }
+  });
+})();
+</script>
+</body>
+</html>
